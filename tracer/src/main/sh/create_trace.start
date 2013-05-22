@@ -1,0 +1,7 @@
+#!/bin/sh
+
+cp /opt/r/bioc-2.7/RCurl/libs/RCurl.so.orig /opt/r/bioc-2.7/RCurl/libs/RCurl.so
+chgrp r /opt/r/bioc-2.7/RCurl/libs/RCurl.so
+DISPLAY=:3
+xpra start $DISPLAY
+export DISPLAY     

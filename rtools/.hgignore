@@ -1,0 +1,9 @@
+syntax: regexp
+\.project$
+^target/
+^src/org/rx/scratch
+\.class$
+~$
+\.pdf$
+\.log$
+\.data$

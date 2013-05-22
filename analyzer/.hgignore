@@ -1,0 +1,9 @@
+syntax: regexp
+\.project$
+^\.settings/
+^target/
+^lib/
+~$
+\.class$
+\.tokens$
+^src/org/rx/analyser/parser/

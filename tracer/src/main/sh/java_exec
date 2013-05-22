@@ -1,0 +1,5 @@
+#!/bin/sh
+source /opt/r/tracer/env.sh
+
+[ -f "$1" ] && f="-jar"
+$JAVA -cp $CLASSPATH $JAVA_OPTS $f $* || echo "Java Error: $f $*"

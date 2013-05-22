@@ -1,0 +1,256 @@
+#!/bin/sh
+
+source /opt/r/tracer/env.sh
+
+usage () {
+cat << EOF
+Syntax: $0 [flags] <action> [params*]
+flags:
+	-p|--proc: Set number of processors [$PROCESSORS]
+	-J|--java-opts: Set java default options [$JAVA_OPTS]
+	-j|--jar: Set jar rtrace jar file [$JARPATH]
+	--java: Use jvm command [$JAVA]
+	-T|--tag: use tag [$TAG]
+	-R|--result-dir: use tag [$RESULT_DIR]
+actions:
+	all: do all ...
+	generate: generate traces 
+	foreign: calculate % of time in foreign calls
+	static: Do static analysis
+	process [file [opts]*]: Parse trace & process logs (default: $TRACEDIR/$TAG/$DEFAULT_TRACE_LIST $PARSE_OPTS)
+	charts: Generate charts
+pre-process actions:
+	deps: Compute dependencies (must be done before static processing)
+	make-list: Generate many list (good, size, empty, ...)
+more actions:
+	source: extract sources from tgz
+	archive: TODO
+	parse-stats: Dump processing stats
+	clean-all: all
+	clean-deps: Remove dependencies
+	clean-lists: Remove lists
+	clean-results: Remove results
+	help: Help screen & default values
+EOF
+	exit $1
+}
+
+while true; do
+	[ -z "$1" ] && usage 1
+	ACTION="$1"
+	shift
+
+case "$ACTION" in
+	--proc*|-p)
+		PROCESSORS="$1"
+		export PROCESSORS
+		shift
+		;;
+	--java)
+		JAVA="$1"
+		export JAVA
+		shift
+		;;
+	--java-opts|-J)
+		JAVA_OPTS="$1"
+		export JAVA_OPTS
+		shift
+		;;
+	--jar|-j)
+		JARPATH="$1"
+		export JARPATH
+		shift
+		;;
+	--tag|-T)
+		TAG="$1"
+		export TAG
+		shift
+		;;
+	--result-dir|-R)
+		RESULT_DIR="$1"
+		export RESULT_DIR
+		shift
+		;;
+	make-list*)
+		$SCRIPTDIR/makelists.sh $*
+		exit $?
+		;;
+	deps)
+		[ -f "$1" ] || error need a file # TODO use default all list
+		f=$1
+		shift
+		timed_command $RESULT_DIR/$TAG/deps-time.log launch "$SCRIPTDIR/deps.sh" < $f
+		exit $?
+		;;
+	clean-all)
+		tracer clean-deps $* &&
+		tracer clean-lists $* && 
+		tracer clean-results $*
+		exit $?
+		;;
+	clean-dep*)
+		DIR="$TRACEDIR/$TAG"
+		[ "$1" ] && DIR=$1
+		rm -f $DIR/*/deps ; rm -f $DIR/*/alldeps
+		rm -f $DIR/*/libs ; rm -f $DIR/*/others
+		exit $?
+		;;
+	clean-list*)
+		DIR="$TRACEDIR/$TAG"
+		[ "$1" ] && DIR=$1
+		rm -f $DIR/*.list
+		exit $?
+		;;
+	clean-results)
+		DIR="$RESULT_DIR/$TAG"
+		[ "$1" ] && DIR=$1
+		[ ! -d "$DIR" ] && error "no such directory: $DIR"
+		echo "Are you sure ? Removing in 10s $DIR"
+		sleep 10s && rm -Rf $DIR
+		exit $?
+		;;
+	all)
+		[ -z "$1" ] && echo toto && error "need a file"
+		F=$TRACEDIR/$TAG/$1
+		echo ">> Making list ..."
+		$SCRIPTDIR/tracer make-lists
+		[ -f "$F" ] || error "file list '$F' doesn't exists"
+		echo ">> Patching ..."
+		$SCRIPTDIR/tracer patch $F
+		#echo ">> Making dependencies ..."
+		#$SCRIPTDIR/tracer deps $F &&
+		#echo ">> Static analysis ... $STATIC_OPTS" &&
+		#$SCRIPTDIR/tracer static $F &&
+		PROCESSORS=1
+		echo ">> Parsing traces ... $PARSE_OPTS" &&
+		$SCRIPTDIR/tracer process $F
+		exit $?
+		;;
+	static)
+		[ -f "$1" ] || error need a file
+		f=$1
+		shift
+		OPTS="$STATIC_OPTS"
+		[ "$*" ] && OPTS="$*"
+		timed_command $RESULT_DIR/$TAG/static-time.log launch "$SCRIPTDIR/static.sh" $OPTS < $f
+		exit $?
+		;;
+	foreign)
+		[ -f "$1" ] || error need a file
+		f=$1
+		shift
+		DIR="$RESULT_DIR/$TAG"
+		makedir $DIR
+		OPTS="$FOREIGN_OPTS"
+		[ "$*" ] && OPTS="$*"
+		"$SCRIPTDIR/profile_vignette_nativecode.sh" $OPTS < $f
+		exit $?
+		;;
+	oprofile)
+		[ -f "$1" ] || error need a file
+		f=$1
+		shift
+		DIR="$RESULT_DIR/$TAG"
+		makedir $DIR
+		OPTS=""
+		[ "$*" ] && OPTS="$*"
+		sudo "$SCRIPTDIR/oprofile.sh" $OPTS < $f
+		exit $?
+		;;
+	old-foreign)
+		[ -f "$1" ] || error need a file
+		f=$1
+		shift
+		OPTS="$FOREIGN_OPTS"
+		[ "$*" ] && OPTS="$*"
+		timed_command $RESULT_DIR/$TAG/foreign-time.log launch "$SCRIPTDIR/foreign.sh" $OPTS < $f
+		tracer foreign-post-process
+		exit $?
+		;;
+	foreign-post-process)
+		c=0
+		cat $RESULT_DIR/$TAG/foreign/foreign-results.txt  |
+		while read i ; do
+			test "`expr $c % 2`" = "1" && echo $i " " || echo -n $i " "
+			c=$((c+1))
+		done | sed 's/^.*"\(.*\)".*"\([^,]*\)*,.*$/\1 \2/' > $RESULT_DIR/$TAG/foreign/foreign-results-post-process.txt 
+		
+		exit $?
+		;;
+	generate|create)
+		[ -f "$1" ] || error need a file
+		f=$1
+		shift
+		OPTS="$GENERATE_OPTS"
+		[ "$*" ] && OPTS="$*"
+		timed_command $RESULT_DIR/$TAG/trace-time.log launch "$SCRIPTDIR/create_trace.sh" $OPTS < $f
+		$SCRIPTDIR/makelists.sh
+		exit $?
+		;;
+	create-summary)
+		[ -f "$1" ] || error need a file
+		f=$1
+		shift
+		OPTS="$GENERATE_OPTS"
+		[ "$*" ] && OPTS="$*"
+		export TRACETYPE=summary
+		timed_command $RESULT_DIR/$TAG/trace-time.log launch "$SCRIPTDIR/create_trace.sh" $OPTS < $f
+		$SCRIPTDIR/makelists.sh
+		exit $?
+		;;
+	patch)
+		makedir $RESULT_DIR/$TAG
+		java_exec org.rx.SourcePatcher --db $RESULT_DIR/$TAG $TRACEDIR/$TAG/*/source.map.gz 2> $RESULT_DIR/$TAG/patch.err.log | tee $RESULT_DIR/$TAG/patch.log
+		exit $?
+		;;
+	process)
+		f=$TRACEDIR/$TAG/$DEFAULT_TRACE_LIST
+		if [ "$1" = "-" ] ; then
+			shift
+		else
+			[ "$1" ] && f=$1 && shift 
+			[ -f "$f" ]  || error need a file
+		fi
+		OPTS="$PARSE_OPTS"
+		[ "$*" ] && OPTS="$*"
+		timed_command $RESULT_DIR/$TAG/process-time.log launch "$SCRIPTDIR/process-trace.sh" $OPTS < $f
+		exit $?
+		;;
+	external-calls)
+		[ -f "$1" ] || error need a file
+		f=$1
+		shift
+		timed_command $RESULT_DIR/$TAG/process-time.log launch "$SCRIPTDIR/find_extern_calls.sh" < $f
+		exit $?
+		;;
+	source)
+		"$SCRIPTDIR/extract-r-sources.sh" $*
+		exit $?
+		;;
+	parse-stats)
+		sh "$SCRIPTDIR/stat.sh" $*
+		exit $?
+		;;
+	chart*)
+		exec echo todo charts
+		;;
+	arch*)
+		exec echo todo archive
+		;;
+	help|--help)
+		usage 0
+		;;
+	jexec)
+		exec java_exec $*
+		;;
+	test)
+		[ "$*" ] && echo some
+		[ -z "$*" ] && echo none
+		exit $?
+		;;
+	*)
+		echo "Action unknown: $ACTION"
+		usage 1
+		;;
+esac
+done

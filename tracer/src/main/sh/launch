@@ -1,0 +1,21 @@
+#!/bin/sh
+
+source /opt/r/tracer/env.sh
+
+PROG="$1"
+bn="`basename $PROG .sh`"
+output="/tmp/$bn"
+shift
+[ -f "$SCRIPTDIR/$bn.start" ] && source "$SCRIPTDIR/$bn.start"
+
+
+cat - | sh $SCRIPTDIR/split.sh $PROCESSORS $output
+
+i=0
+while [ $i -lt $PROCESSORS ] ; do
+	[ -f "$output.$i" ] && $PROG $*  < $output.$i &
+	i=$((i+1))
+done
+wait
+
+[ -f "$SCRIPTDIR/$bn.stop" ] && source "$SCRIPTDIR/$bn.stop"

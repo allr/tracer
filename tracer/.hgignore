@@ -1,0 +1,16 @@
+syntax: glob
+
+*~
+\#*\#
+*.pdf
+*.log
+*.data
+
+# Java generated files
+bin/
+target/
+
+# DB stuff
+*.db
+*db-journal
+*.db.bak

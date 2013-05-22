@@ -1,0 +1,7 @@
+#!/bin/sh
+source /opt/r/tracer/env.sh
+
+output=$1
+makedir "`dirname $output`"
+shift
+/usr/bin/time -o $output -a -f '%Uuser %Ssystem %Eelapsed %PCPU %C' $*
