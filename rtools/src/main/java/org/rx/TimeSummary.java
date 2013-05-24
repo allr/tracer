@@ -40,7 +40,7 @@ public class TimeSummary extends Summary {
 		new TraceMultiInfo("dotCode", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("dotExternal", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("dotBuiltIn", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("dotBuiltIn2", new String[]{"time", "atime", "hrtime", "forced"}),
+		//new TraceMultiInfo("dotBuiltIn2", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("dotSpecial2", new String[]{"time", "atime", "hrtime", "forced"}),
 		//new TraceMultiInfo("dotCallFull", new String[]{"time", "atime", "hrtime", "forced"}),
 		//new TraceMultiInfo("dotCodeFull", new String[]{"time", "atime", "hrtime", "forced"}),
@@ -56,7 +56,7 @@ public class TimeSummary extends Summary {
 		new TraceMultiInfo("allocS4", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("allocList", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("cons", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("R_alloc", new String[]{"time", "atime", "hrtime", "forced"}),
+		//new TraceMultiInfo("R_alloc", new String[]{"time", "atime", "hrtime", "forced"}),
 
 		new TraceMultiInfo("CheckStack", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("Install", new String[]{"time", "atime", "hrtime", "forced"}),
@@ -68,7 +68,7 @@ public class TimeSummary extends Summary {
 		new TraceMultiInfo("System", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("Download", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("Sleep", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("CurlPerform", new String[]{"time", "atime", "hrtime", "forced"}),
+		//new TraceMultiInfo("CurlPerform", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("inSockConnect", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("inSockOpen", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("inSockRead", new String[]{"time", "atime", "hrtime", "forced"}),
@@ -81,7 +81,7 @@ public class TimeSummary extends Summary {
 		new TraceMultiInfo("doUnzip", new String[]{"time", "atime", "hrtime", "forced"}),
 
 		new TraceMultiInfo("onExits", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("FindContext", new String[]{"time", "atime", "hrtime", "forced"})
+		//new TraceMultiInfo("FindContext", new String[]{"time", "atime", "hrtime", "forced"})
 		};
 	
 	public TraceInfo[] get_summary_fields(){
