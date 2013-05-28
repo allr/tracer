@@ -1,1 +1,5 @@
 Contents originally cloned from http://r.cs.purdue.edu/hg/
+
+Minor modifications made for compatibility with R-3.0.1.
+Currently does not work because it does not parse opcode 0x86
+in trace files. If you need that fixed, ask the original authors.

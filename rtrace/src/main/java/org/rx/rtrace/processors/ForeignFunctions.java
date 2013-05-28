@@ -28,7 +28,6 @@ public class ForeignFunctions extends BasicProcessor {
 		func_map.put(FunctionMap.get_primitive_location(".Fortran"), 0);
 		func_map.put(FunctionMap.get_primitive_location(".External"), 0);
 		func_map.put(FunctionMap.get_primitive_location(".Call"), 0);
-		func_map.put(FunctionMap.get_primitive_location(".Call.ignored"), 0);
 	}
 	
 	@Override
