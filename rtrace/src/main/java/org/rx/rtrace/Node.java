@@ -52,6 +52,8 @@ public abstract class Node {
 	static private void dropContext(){
 		enclosing.remove(enclosing.size() - 1);
 	}
+
+	// returns a location_id
 	static public int getCurrentContext(){
 		int pos = enclosing.size() - 1;
 		do {
@@ -59,7 +61,7 @@ public abstract class Node {
 			if(skip_internal){
 				if(ctx > DataBase.last_primitive_location)
 					return ctx;
-			} else if(ctx != 33 && ctx != 18)
+			} else if(ctx != 33 && ctx != 18) // 33: .Internal, 18: { - happens to be the same in R-3
 				return ctx;
 			pos --;
 		} while(pos >= 0);
@@ -933,7 +935,7 @@ public abstract class Node {
 		}
 	}
 	public static abstract class CompositeNode extends Node {
-		private int body;
+		private int body; // number of nodes processed in subtree? -ik
 		protected CompositeNode(Node parent) {
 			super(parent);
 		}
@@ -1056,11 +1058,15 @@ public abstract class Node {
 			return more_args;
 		}
 	}
+
+
 	public static class FunctionCall extends AbsCall {
 		int by_keywords;
+
 		protected FunctionCall(Node parent, boolean has_prologue) throws Exception {
 			super(parent, has_prologue);
 		}
+
 		@Override
 		protected void accept_visitor(TraceProcessor[] processors) throws Exception {
 			for(TraceProcessor processor: processors)
@@ -1074,6 +1080,7 @@ public abstract class Node {
 		public String toString() {
 			return "Function: "+getName();
 		}
+
 		protected int buildName() throws Exception{
 			int addr = readPtr(stream);
 			by_position = readByte(stream);
@@ -1085,12 +1092,15 @@ public abstract class Node {
 		public int get_by_keywords(){
 			return by_keywords;
 		}
+
 	}
 	
 	public abstract static class PrimitiveCall extends AbsCall {
+
 		protected PrimitiveCall(Node parent, boolean has_prologue) throws Exception {
 			super(parent, has_prologue);
 		}
+
 		protected int buildName() throws IOException{
 			int sid = readShort(stream);
 			by_position = readByte(stream);
@@ -1278,6 +1288,7 @@ public abstract class Node {
 		}
 	}
 
+	// return value is number of nodes created on this level?
 	static private int build_tree_until(TraceProcessor[] processors, Node parent, int stop) throws Exception{
 		final DataInputStream s = stream;
 
@@ -1427,21 +1438,21 @@ public abstract class Node {
 	public static final int R_ERROR = 0x8C;
 	public static final int LOG_ERROR = 0x8D;
 	
-	public static final int PROM_NEW_MOD = 0x40; // value 0x40 is still in r-trace
-	public static final int UNBND_PROM = 0x8E;
-	public static final int BND_PROM = 0x8F;
-	public static final int EVAL_BND_PROM = 0x87;
-	public static final int EVAL_UNBND_PROM = 0x88;
-	public static final int END_EVAL_PROM = 0x89;
+	public static final int PROM_NEW_MOD = 0x40; // NEW_PROMISE / "value 0x40 is still in r-trace"[orig comment]
+	public static final int UNBND_PROM = 0x8E;   // UBND / emit_simple_type
+	public static final int BND_PROM = 0x8F;     // BND  / emit_simple_type
+	public static final int EVAL_BND_PROM = 0x87;   // BND_PROM_START  / emit_bnd_promise
+	public static final int EVAL_UNBND_PROM = 0x88; // UBND_PROM_START / emit_unbnd_promise
+	public static final int END_EVAL_PROM = 0x89;   // PROM_END
 	
 	public static final int PROLOGUE = 0x96;
 	public static final int END_PROLOGUE = 0x97;
 
 	public static final int EVAL_BUILTIN = 0x90;
-	public static final int EVAL_CLOSURE = 0x94;
+	public static final int EVAL_CLOSURE = 0x94;    // CLOS_ID
 	public static final int EVAL_SPECIAL = 0x92;
 	public static final int NO_PROLOGUE_MOD = 0x01;
-	public static final int END_EVAL_CALL = 0x86;
+	public static final int END_EVAL_CALL = 0x86;   // FUNC_END / emit_function_return
 	
 	static private Node make_new_node(int node_id, Node parent) throws Exception{
 		switch(node_id){

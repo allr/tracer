@@ -152,6 +152,8 @@ public class RLibrary {
 		
 	}
 	
+	/* maps a file name that may include a full path to a plain file name if the path is recognized */
+	/* the mapping is cached in file_cache */
 	public static String source_to_relative(String fname){
 		String found = file_cache.get(fname);
 		if(found != null)
@@ -165,6 +167,7 @@ public class RLibrary {
 			found = fname.substring("/opt/r/r-instrumented-hg/library".length()+1);
 		else{
 			found = fname; // In case of we don't change the file name :S
+			// search for an entry in library path that is a substring of fname, return the first match
 			for(String dir: library_path)
 				if(fname.startsWith(dir)) {
 					found = fname.substring(dir.length()+(dir.endsWith(File.separator) ? 0 : 1));

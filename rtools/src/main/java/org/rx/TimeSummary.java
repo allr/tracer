@@ -1,3 +1,5 @@
+// NOTICE: main function seems to be unused
+
 package org.rx;
 
 import java.io.File;

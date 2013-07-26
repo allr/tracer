@@ -12,6 +12,9 @@ import org.rx.rtrace.Node.BuiltInCall;
 
 
 public class ForeignFunctions extends BasicProcessor {
+	// location_id -> count
+	// pre-filled with loc_ids for .C, .Fortran, .External and .Call
+	// loc_ids not in here are ignored
 	protected Map<Integer,Integer> func_map;
 //	private String map_file;
 
@@ -84,8 +87,11 @@ public class ForeignFunctions extends BasicProcessor {
 			public void visit_apply_builtin(BuiltInCall node) throws Exception {
 				int id = node.getID();
 				Integer count = func_map.get(id);
+				// check if a func_map entry exists for this (location_)id
 				if(count != null){
+				// it does, check if there were any subnodes?
 					if(node.getBody() > 0){
+						// yes, increment counter
 						func_map.put(id, count + 1);
 					}
 				}

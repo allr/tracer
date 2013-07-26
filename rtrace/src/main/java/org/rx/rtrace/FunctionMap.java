@@ -18,7 +18,9 @@ import org.rx.SourcePatcher;
 public class FunctionMap {
 	public static String DEFAULT_MAP_FILE_NAME = "source.map";
 	
+	// mapping address -> location_id
 	private final static Map<Long, Integer> memory_map = new HashMap<Long, Integer>();
+	// mapping location_id -> number of entries seen with that ID (in smap.patched)
 	private final static Map<Integer, Integer> fun_count = new HashMap<Integer, Integer>();
 	private static BufferedReader map_file_reader;
 	private static BufferEntry map_file_buffer;
@@ -31,11 +33,13 @@ public class FunctionMap {
 	}
 	
 	public static int load_and_get(long addr, long ts) throws IOException, SQLException{
+		// addr: function address from trace file, ts: offset in trace file _after_ the function entry (->bytes_read)
 		read_throught(ts);
 		return get(addr);
 	}
 	
 	public static int get(long addr){
+		// return location_id corresponding to the address?
 		Integer id = memory_map.get(addr);
 		if(id == null)
 			return DataBase.UNKNOWN_LOCATION;
@@ -106,14 +110,23 @@ public class FunctionMap {
 	}
 	
 	static protected void read_throught(long ts) throws IOException, SQLException {
+		// ts: offset in trace file after a function call entry
+		// -> first entry in source map file is the bytes_written value,
+		//    so this probably reads entries from there until it finds the one that was
+		//    outputted at the same time as the trace entry that was just read?
 		while(map_file_buffer != null && map_file_buffer.ts < ts){
+			// puts addr => location_id into memory_map
 			map_file_buffer.put();
+
+			// count the number of entries that refer to the same location_id
 			int id = map_file_buffer.id;
 			Integer dups = fun_count.get(id);
 			if(dups == null)
 				fun_count.put(id, 1);
 			else
 				fun_count.put(id, dups + 1);
+
+			// next line
 			bufferize_next();
 		}
 	}
@@ -124,10 +137,15 @@ public class FunctionMap {
 			map_file_buffer = null;
 			return;
 		}
+		// split on space or tab
+		// sample line (source.map.gz.patch): "0x0000005c 0x1ec9a78 22275"
+		//                                      ts          addr    loc_id
 		String[] parts = colum_separator.split(line);
 		if(parts.length < 3)
 			throw new RuntimeException("source.map syntax error on line "+line_read+" only "+parts.length+" entries !");
-		map_file_buffer = new BufferEntry(FileTools.parseLong(parts[1]), FileTools.parseInt(parts[2]), FileTools.parseLong(parts[0]));
+		map_file_buffer = new BufferEntry(FileTools.parseLong(parts[1]), // addr
+		                                  FileTools.parseInt(parts[2]),  // loc_id
+		                                  FileTools.parseLong(parts[0]));// ts
 	}
 
 	private static class BufferEntry{
@@ -136,7 +154,7 @@ public class FunctionMap {
 		final Long ts;
 		BufferEntry(Long addr, int id, Long ts){
 			this.addr = addr;
-			this.id = id;
+			this.id = id; // location_id
 			this.ts = ts;
 		}
 		

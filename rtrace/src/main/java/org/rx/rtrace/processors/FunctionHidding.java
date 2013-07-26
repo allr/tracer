@@ -13,7 +13,9 @@ import org.rx.rtrace.Node.FunctionCall;
 import org.rx.rtrace.Node.SpecialCall;
 
 public class FunctionHidding  extends BasicProcessor{
+	// location_id -> counter
 	protected Map<Integer,Integer> function_hidden;
+	// len (target_node.getPrologue()) -> counter
 	protected Map<Integer,Integer> function_hide_chain;
 
 	public FunctionHidding(Connection conn) {

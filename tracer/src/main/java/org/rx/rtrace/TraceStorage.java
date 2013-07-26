@@ -320,16 +320,16 @@ public class TraceStorage {
 	
 	private static PreparedStatement prepareTraceForInsert(
 			PreparedStatement pstmt, Trace trace) throws SQLException {
-		pstmt.setString(1, trace.getName());
-		pstmt.setLong(2, dateToLong(trace.getDate()));
-		pstmt.setInt(3, trace.getStatus().ordinal());
-		pstmt.setBoolean(4, trace.isError());
-		pstmt.setString(5, trace.getSourceFile().getAbsolutePath());
+		pstmt.setString(1, trace.getName());                         // name
+		pstmt.setLong(2, dateToLong(trace.getDate()));               // ts
+		pstmt.setInt(3, trace.getStatus().ordinal());                // status
+		pstmt.setBoolean(4, trace.isError());                        // error
+		pstmt.setString(5, trace.getSourceFile().getAbsolutePath()); // src_file
 		pstmt.setString(6, CommandLineUtils.joinArguments(
-				trace.getRunCmdArgs()));
-		pstmt.setString(7, trace.getOutputDir().getAbsolutePath());
-		pstmt.setString(8, trace.getFileType());
-		pstmt.setString(9, trace.getMapFileType());
+		                trace.getRunCmdArgs()));                     // run_cmd_args
+		pstmt.setString(7, trace.getOutputDir().getAbsolutePath());  // output_dir
+		pstmt.setString(8, trace.getFileType());                     // file_type
+		pstmt.setString(9, trace.getMapFileType());                  // map_file_type
 		return pstmt;
 	}
 	

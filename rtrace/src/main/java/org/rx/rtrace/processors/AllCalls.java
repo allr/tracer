@@ -92,7 +92,7 @@ public class AllCalls extends BasicProcessor {
 					"values ("+id+", ?, ?, ?, ?, ?, ?, ?, ?)");
 			try {
 				for(long key: func_map.keySet()){
-					int fun_id = funId(key);
+					int fun_id = funId(key);  // location_id
 					int enc_fun = enclosingId(key);
 
 					stmt.setInt(1, fun_id);
@@ -166,14 +166,16 @@ public class AllCalls extends BasicProcessor {
 			private void visit_apply_abs_call(AbsCall node){
 				int fid = 0;
 				Integer enc_call = Node.getCurrentContext();
-				if(enc_call != null)
+				if(enc_call != null)  // enc: "enclosing"
 					fid = enc_call;
 				long id = hashKey(node.getID(), fid);
 				CallCounter value = func_map.get(id);
 				if(value == null){
+					// create new entry
 					value = new CallCounter(node.get_by_position(), node.get_by_keywords(), node.get_more_args());
 					func_map.put(id, value);
 				}else{
+					// increment values in existing entry
 					value.increment(node.get_by_position(), node.get_by_keywords(), node.get_more_args());
 				}
 				if(node.getReturn() instanceof UnitSXP)
@@ -183,15 +185,19 @@ public class AllCalls extends BasicProcessor {
 				int total = 0, nb;
 				total += nb = node.get_by_position();
 				if(nb > 0)
+					// increment <#by_position> counter
 					nb_position.put(nb, nb_position.get(nb)+1);
 				total += nb = node.get_by_keywords();
 				if(nb > 0)
+					// increment <#keywords> counter
 					nb_keywords.put(nb, nb_keywords.get(nb)+1);
 				total += nb = node.get_more_args();
 				if(nb > 0)
+					// increment <#more_args> counter
 					nb_rest.put(nb, nb_rest.get(nb)+1);
 				if(total > 255)
 					total = 255;
+				// increment <total> counter
 				nb_param.put(total, nb_param.get(total)+1);
 			}
 			@Override
