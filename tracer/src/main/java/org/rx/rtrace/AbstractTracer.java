@@ -1,6 +1,7 @@
 package org.rx.rtrace;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -180,6 +181,34 @@ abstract class AbstractTracer implements Tracer {
 			String[] cmdArray = getCommandArray();
 			System.err.println("cmdArray = " + Arrays.toString(cmdArray));
 			Process proc = Runtime.getRuntime().exec(cmdArray);
+
+                        /* discard output from the subprocess to avoid stalling */
+                        /* java.lang.Process sucks */
+                        boolean finished = false;
+                        InputStream stdout = proc.getInputStream();
+                        InputStream stderr = proc.getErrorStream();
+
+                        while (!finished) {
+                                try {
+                                        /* check if process has exited */
+                                        int result = proc.exitValue();
+                                        finished = true;
+                                } catch (IllegalThreadStateException e) {
+                                        /* not terminated yet, read outputs */
+                                        if (stdout.available() > 0) {
+                                                int i;
+                                                for (i=0; i < stdout.available(); i++)
+                                                        stdout.read();
+                                        }
+                                        if (stderr.available() > 0) {
+                                                int i;
+                                                for (i=0; i < stderr.available(); i++)
+                                                        stderr.read();
+                                        }
+                                }
+                                Thread.sleep(500); // eat less CPU
+                        }
+
 			return proc.waitFor();
 		}
 		
