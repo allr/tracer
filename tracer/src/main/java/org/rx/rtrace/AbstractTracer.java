@@ -195,15 +195,17 @@ abstract class AbstractTracer implements Tracer {
                                         finished = true;
                                 } catch (IllegalThreadStateException e) {
                                         /* not terminated yet, read outputs */
-                                        if (stdout.available() > 0) {
-                                                int i;
-                                                for (i=0; i < stdout.available(); i++)
-                                                        stdout.read();
-                                        }
-                                        if (stderr.available() > 0) {
-                                                int i;
-                                                for (i=0; i < stderr.available(); i++)
-                                                        stderr.read();
+                                        while (stdout.available() > 0 || stderr.available() > 0) {
+                                                if (stdout.available() > 0) {
+                                                        int i;
+                                                        for (i=0; i < stdout.available(); i++)
+                                                                stdout.read();
+                                                }
+                                                if (stderr.available() > 0) {
+                                                        int i;
+                                                        for (i=0; i < stderr.available(); i++)
+                                                                stderr.read();
+                                                }
                                         }
                                 }
                                 Thread.sleep(500); // eat less CPU
