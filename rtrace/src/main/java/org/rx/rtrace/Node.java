@@ -23,6 +23,9 @@ public abstract class Node {
 
 //	static private final Node[] null_node_array = new Node[0];
 	static private DataInputStream stream;
+        // actually used as a stack:
+        //   addLast in PrologueNode.accept_visitor
+        //   removeLast in AbsCall.attach_args
 	static private ArrayDeque<Node> prologues = new ArrayDeque<Node>();
 	
 	static protected int bytes_read;
@@ -995,6 +998,8 @@ public abstract class Node {
 			if(has_prologue) attach_args();
 			build_body(processors);
 			int bcode = readByte(s);
+
+                        /* read return type */
 			Node n = make_new_node(bcode, this);
 			_return = n;
 			n.accept_visitor(processors);
@@ -1081,11 +1086,13 @@ public abstract class Node {
 			return "Function: "+getName();
 		}
 
+                // returns a location_id
 		protected int buildName() throws Exception{
-			int addr = readPtr(stream);
-			by_position = readByte(stream);
-			by_keywords = readByte(stream);
-			more_args = readByte(stream);
+                        /* read parameters from trace */
+			int addr = readPtr(stream);     // contents of passed SEXP ptr
+			by_position = readByte(stream); // number of by-position params
+			by_keywords = readByte(stream); // number of by-keyword params
+			more_args = readByte(stream);   // number of other params
 			return FunctionMap.load_and_get(addr, bytes_read);
 		}
 		
