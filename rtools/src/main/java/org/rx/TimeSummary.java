@@ -39,7 +39,9 @@ public class TimeSummary extends Summary {
 		new TraceMultiInfo("Match", new String[]{"time", "atime", "hrtime", "forced"}),
 
 		new TraceMultiInfo("dotCall", new String[]{"time", "atime", "hrtime", "forced"}),
+		new TraceMultiInfo("dotCallFull", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("dotCode", new String[]{"time", "atime", "hrtime", "forced"}),
+		new TraceMultiInfo("dotCodeFull", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("dotExternal", new String[]{"time", "atime", "hrtime", "forced"}),
 		new TraceMultiInfo("dotBuiltIn", new String[]{"time", "atime", "hrtime", "forced"}),
 		//new TraceMultiInfo("dotBuiltIn2", new String[]{"time", "atime", "hrtime", "forced"}),
