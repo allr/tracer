@@ -125,6 +125,7 @@ public class TimeSummary extends Summary {
                 // additional sums synthesized by timeR
                 new TimeTMI("BuiltinSum"),
                 new TimeTMI("SpecialSum"),
+                new TraceInfo("TotalRuntime"),
 
 		};
 	
