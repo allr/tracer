@@ -13,6 +13,15 @@ public class TimeSummary extends Summary {
 	public String get_reference_field(){ return "vignettes"; };
 	public String get_table_name() { return "time_summary"; }
 
+        // wrapper class to generate a default parameter
+        public static class TimeTMI extends TraceMultiInfo {
+                public TimeTMI(String name) {
+                        super(name, new String[]{"self", "total", "starts", "aborts"});
+                }
+        }
+
+        // FIXME: Rotate table by 90 degrees, throw this array away and
+        //        create the names dynamically from the .time file
 	static final TraceInfo fields[] = {
 		new TraceInfo("TraceDate", "text"),
 		new TraceInfo("Workdir", "text"),
@@ -29,63 +38,94 @@ public class TimeSummary extends Summary {
 		new TraceInfo("RusageSignalsRcvd"),
 		new TraceInfo("RusageVolnContextSwitches"),
 		new TraceInfo("RusageInvolnContextSwitches"),
-		
-		new TraceMultiInfo("MainLoop", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("Repl", new String[]{"time", "atime", "hrtime", "forced"}),
 
-		new TraceMultiInfo("SymLookup", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("FunLookup", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("FunLookupEval", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("Match", new String[]{"time", "atime", "hrtime", "forced"}),
+                // timeR internal
+                new TimeTMI("Startup"),
+                new TimeTMI("UserFuncFallback"),
 
-		new TraceMultiInfo("dotCall", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("dotCallFull", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("dotCode", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("dotCodeFull", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("dotExternal", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("dotBuiltIn", new String[]{"time", "atime", "hrtime", "forced"}),
-		//new TraceMultiInfo("dotBuiltIn2", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("dotSpecial2", new String[]{"time", "atime", "hrtime", "forced"}),
-		//new TraceMultiInfo("dotCallFull", new String[]{"time", "atime", "hrtime", "forced"}),
-		//new TraceMultiInfo("dotCodeFull", new String[]{"time", "atime", "hrtime", "forced"}),
+                // memory.c
+		new TimeTMI("cons"),
+		new TimeTMI("allocVector"),
+		new TimeTMI("allocList"),
+		new TimeTMI("allocS4"),
+		new TimeTMI("GCInternal"),
+		new TimeTMI("Protect"),
+		new TimeTMI("Unprotect"),
+		new TimeTMI("UnprotectPtr"),
 
-		new TraceMultiInfo("doLogic", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("doArith", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("doSubset", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("doSubset2", new String[]{"time", "atime", "hrtime", "forced"}),
-		
-		
-		new TraceMultiInfo("Duplicate", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("allocVector", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("allocS4", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("allocList", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("cons", new String[]{"time", "atime", "hrtime", "forced"}),
-		//new TraceMultiInfo("R_alloc", new String[]{"time", "atime", "hrtime", "forced"}),
+                // arith.c
+		new TimeTMI("doArith"),
 
-		new TraceMultiInfo("CheckStack", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("Install", new String[]{"time", "atime", "hrtime", "forced"}),
+                // connections.c
+		new TimeTMI("gzFile"),
+		new TimeTMI("bzFile"),
+		new TimeTMI("xzFile"),
 
-		new TraceMultiInfo("UnprotectPtr", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("Protect", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("GCInternal", new String[]{"time", "atime", "hrtime", "forced"}),
-		
-		new TraceMultiInfo("System", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("Download", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("Sleep", new String[]{"time", "atime", "hrtime", "forced"}),
-		//new TraceMultiInfo("CurlPerform", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("inSockConnect", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("inSockOpen", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("inSockRead", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("inSockWrite", new String[]{"time", "atime", "hrtime", "forced"}),
+                // context.c
+		new TimeTMI("onExits"),
 
-		new TraceMultiInfo("xzFile", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("bzFile", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("gzFile", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("zipRead", new String[]{"time", "atime", "hrtime", "forced"}),
-		new TraceMultiInfo("doUnzip", new String[]{"time", "atime", "hrtime", "forced"}),
+                // dotcode.c
+		new TimeTMI("dotExternal"),
+		new TimeTMI("dotCallFull"),
+		new TimeTMI("dotCall"),
+		new TimeTMI("dotCodeFull"),
+		new TimeTMI("dotCode"),
 
-		new TraceMultiInfo("onExits", new String[]{"time", "atime", "hrtime", "forced"}),
-		//new TraceMultiInfo("FindContext", new String[]{"time", "atime", "hrtime", "forced"})
+                // dounzip.c
+		new TimeTMI("doUnzip"),
+		new TimeTMI("zipRead"),
+
+		// duplicate.c
+		new TimeTMI("Duplicate"),
+
+                // envir.c
+		new TimeTMI("SymLookup"),
+		new TimeTMI("FunLookup"),
+		new TimeTMI("FunLookupEval"),
+
+                // errors.c
+		new TimeTMI("CheckStack"),
+
+		// eval.c
+                new TimeTMI("Match"),
+		new TimeTMI("dotBuiltIn"),
+                new TimeTMI("Eval"),
+                new TimeTMI("bcEval"),
+
+                // internet.c
+		new TimeTMI("Download"),
+
+                // logic.c
+		new TimeTMI("doLogic"),
+
+                // main.c
+		new TimeTMI("Repl"),
+		new TimeTMI("MainLoop"),
+
+                // names.c
+		new TimeTMI("Install"),
+		new TimeTMI("dotSpecial2"),
+
+                // subset.c
+		new TimeTMI("doSubset"),
+		new TimeTMI("doSubset2"),
+
+                // rsock.c
+		new TimeTMI("inSockRead"),
+		new TimeTMI("inSockWrite"),
+		new TimeTMI("inSockOpen"),
+		new TimeTMI("inSockConnect"),
+
+                // sys-std.c
+		new TimeTMI("Sleep"),
+
+		// sys-unix.c
+		new TimeTMI("System"),
+
+                // additional sums synthesized by timeR
+                new TimeTMI("BuiltinSum"),
+                new TimeTMI("SpecialSum"),
+
 		};
 	
 	public TraceInfo[] get_summary_fields(){
