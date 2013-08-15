@@ -56,6 +56,7 @@ public class TraceSummary extends Summary {
 		new TraceMultiInfo("AllocatedVectors", new String[]{"tl", "elts", "size", "asize"}),
 		new TraceMultiInfo("AllocatedSmallVectors", new String[]{"tl", "elts", "size", "asize"}),
 		new TraceMultiInfo("AllocatedLargeVectors", new String[]{"tl", "elts", "size", "asize"}),
+		new TraceMultiInfo("AllocatedOneVectors", new String[]{"tl", "elts", "size", "asize"}),
 		new TraceMultiInfo("AllocatedNullVectors", new String[]{"tl", "elts", "size", "asize"}),
 		new TraceMultiInfo("AllocatedStringBuffer", new String[]{"tl", "elts", "size"}),
 		//new TraceMultiInfo("AllocatedObjects", new String[]{"tl", "elts", "size"}),
