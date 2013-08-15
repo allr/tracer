@@ -56,6 +56,9 @@ public class TimeSummary extends Summary {
                 // arith.c
 		new TimeTMI("doArith"),
 
+                // array.c
+                new TimeTMI("doMatprod"),
+
                 // connections.c
 		new TimeTMI("gzFile"),
 		new TimeTMI("bzFile"),
@@ -97,6 +100,7 @@ public class TimeSummary extends Summary {
 
                 // logic.c
 		new TimeTMI("doLogic"),
+                new TimeTMI("doLogic2"),
 
                 // main.c
 		new TimeTMI("Repl"),
@@ -106,9 +110,13 @@ public class TimeSummary extends Summary {
 		new TimeTMI("Install"),
 		new TimeTMI("dotSpecial2"),
 
+                // relop.c
+                new TimeTMI("doRelop"),
+
                 // subset.c
 		new TimeTMI("doSubset"),
 		new TimeTMI("doSubset2"),
+		new TimeTMI("doSubset3"),
 
                 // rsock.c
 		new TimeTMI("inSockRead"),
