@@ -38,6 +38,8 @@ public class CountRecursive extends BasicProcessor {
 
 	@Override
 	public void initialize_processor(String[] options) throws Exception {
+                super.initialize_processor(options);
+
 		map.clear();
 		recursive_calls = recall_count = 0;
 	}

@@ -37,6 +37,8 @@ public class CountSize  extends BasicProcessor {
 	
 	@Override
 	public void initialize_processor(String[] options) throws Exception {
+                super.initialize_processor(options);
+
 		max_size = -1;
 		min_size = Integer.MAX_VALUE;
 		total_length = nb_calls = 0;
