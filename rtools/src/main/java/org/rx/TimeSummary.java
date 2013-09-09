@@ -68,6 +68,7 @@ public class TimeSummary extends Summary {
 		new TimeTMI("onExits"),
 
                 // dotcode.c
+		new TimeTMI("dotExternalFull"),
 		new TimeTMI("dotExternal"),
 		new TimeTMI("dotCallFull"),
 		new TimeTMI("dotCall"),
