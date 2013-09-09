@@ -104,7 +104,8 @@ public class TimeSummary extends Summary {
 
                 // main.c
 		new TimeTMI("Repl"),
-		new TimeTMI("MainLoop"),
+		new TimeTMI("SetupMainLoop"),
+                new TimeTMI("endMainloop"),
 
                 // names.c
 		new TimeTMI("Install"),
