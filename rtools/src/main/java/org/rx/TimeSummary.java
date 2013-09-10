@@ -72,8 +72,10 @@ public class TimeSummary extends Summary {
 		new TimeTMI("dotExternal"),
 		new TimeTMI("dotCallFull"),
 		new TimeTMI("dotCall"),
-		new TimeTMI("dotCodeFull"),
-		new TimeTMI("dotCode"),
+		new TimeTMI("dotCFull"),
+		new TimeTMI("dotC"),
+		new TimeTMI("dotFortranFull"),
+		new TimeTMI("dotFortran"),
 
                 // dounzip.c
 		new TimeTMI("doUnzip"),
