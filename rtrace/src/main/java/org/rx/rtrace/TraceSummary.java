@@ -46,6 +46,7 @@ public class TraceSummary extends Summary {
 		new TraceInfo("RusageInvolnContextSwitches"),
 		new TraceInfo("EvalsCount"),
 		new TraceInfo("AllocatedCons"),
+                new TraceInfo("AllocatedConsPeak"),
                 new TraceInfo("AllocatedNonCons"),
 		new TraceInfo("AllocatedEnv"),
 		new TraceInfo("AllocatedPromises"),
@@ -72,7 +73,8 @@ public class TraceSummary extends Summary {
 		new TraceInfo("UnusedTag"),
 		new TraceInfo("UnusedAttr"),
 		new TraceInfo("GCObj"),
-		new TraceInfo("GCCons")//,
+		new TraceInfo("GCCons"),
+                new TraceMultiInfo("AvoidedDup", new String[]{"avoided","needed"}),
 //		new TraceMultiInfo("ScalarVector", new String[]{"int", "lgl", "cplx", "real", "str", "expr", "vec", "raw", "total"}),
 //		new TraceMultiInfo("NullVector", new String[]{"int", "lgl", "cplx", "real", "str", "expr", "vec", "raw", "total"}),
 //		new TraceMultiInfo("TrueVector", new String[]{"int", "lgl", "cplx", "real", "str", "expr", "vec", "raw", "total"})

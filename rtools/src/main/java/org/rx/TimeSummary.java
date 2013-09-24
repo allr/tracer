@@ -38,6 +38,8 @@ public class TimeSummary extends Summary {
 		new TraceInfo("RusageSignalsRcvd"),
 		new TraceInfo("RusageVolnContextSwitches"),
 		new TraceInfo("RusageInvolnContextSwitches"),
+                new TraceMultiInfo("OverheadEstimates",
+                                   new String[]{"Small", "Large"}),
 
                 // timeR internal
                 new TimeTMI("Startup"),
@@ -49,9 +51,6 @@ public class TimeSummary extends Summary {
 		new TimeTMI("allocList"),
 		new TimeTMI("allocS4"),
 		new TimeTMI("GCInternal"),
-		new TimeTMI("Protect"),
-		new TimeTMI("Unprotect"),
-		new TimeTMI("UnprotectPtr"),
 
                 // arith.c
 		new TimeTMI("doArith"),
@@ -85,18 +84,14 @@ public class TimeSummary extends Summary {
 		new TimeTMI("Duplicate"),
 
                 // envir.c
+                new TimeTMI("findVarInFrame3other"),
 		new TimeTMI("SymLookup"),
 		new TimeTMI("FunLookup"),
 		new TimeTMI("FunLookupEval"),
 
-                // errors.c
-		new TimeTMI("CheckStack"),
-
 		// eval.c
                 new TimeTMI("Match"),
-		new TimeTMI("dotBuiltIn"),
-                new TimeTMI("Eval"),
-                new TimeTMI("bcEval"),
+                new TimeTMI("evalList"),
 
                 // internet.c
 		new TimeTMI("Download"),
