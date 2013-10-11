@@ -37,21 +37,43 @@ public abstract class Node {
 	public Node getParent(){ return parent; }
 
 	//////////////////////// MOVEME to a proper class //////////////
+
+        /* stack of integer IDs:
+         *   pushed in
+         *   - AbsCall.build_node  (id)
+         *   - EvalUnBndPromise.accept_visitor (getPromiseOwner(getID()))
+         *                                                      -> returns a node id?
+         *
+         *   popped in
+         *   - AbsCall.build_node  (after accepting visitors)
+         *   - EvalUnBndPromise.accept_visitor (after build_node)
+         */
 	static ArrayList<Integer> enclosing = new ArrayList<Integer>();
+	static { enclosing.add(0); } // add an invalid(!) entry as base location
+
+        // promise-node-id (sexpaddr) -> context ID
 	static protected Map<Integer,Integer> prom_map = new LinkedHashMap<Integer, Integer>();
-	static { enclosing.add(0); }
+
+        // pid - promise id (sexpaddr), fid - context ID (getCurrentContext)
 	static private void setPromiseOwner(int pid, int fid){
 		prom_map.put(pid, fid);
 	}
+
+        // lookup context by promise ID
 	static private int getPromiseOwner(int pid){
 		Integer fid = prom_map.get(pid);
 		if(fid == null)
 			return 0;
 		return fid;
 	}
+
+        // push an entry onto "enclosing"
+        // called with a node ID (address for promises, loc_id for funs) or location_id
 	static private void addContext(int fun){
 		enclosing.add(fun);
 	}
+
+        // drop the last entry in "enclosing"
 	static private void dropContext(){
 		enclosing.remove(enclosing.size() - 1);
 	}
@@ -62,9 +84,11 @@ public abstract class Node {
 		do {
 			int ctx = enclosing.get(pos);
 			if(skip_internal){
+                                // returns a context that is not a primitive
 				if(ctx > DataBase.last_primitive_location)
 					return ctx;
 			} else if(ctx != 33 && ctx != 18) // 33: .Internal, 18: { - happens to be the same in R-3
+                                // returns any context except .Internal and {
 				return ctx;
 			pos --;
 		} while(pos >= 0);
@@ -938,7 +962,7 @@ public abstract class Node {
 		}
 	}
 	public static abstract class CompositeNode extends Node {
-		private int body; // number of nodes processed in subtree? -ik
+		private int body; // set to number of nodes created by current build_tree_until call
 		protected CompositeNode(Node parent) {
 			super(parent);
 		}
@@ -956,7 +980,7 @@ public abstract class Node {
 		private PrologueNode prologue;
 		private int args;
 		private Node _return;
-		private int id;
+		private int id; // PRIMOFFSET if PrimitiveCall, ??? if FunctionCall
 		int by_position, more_args;
 
 		protected AbsCall(Node parent, boolean hasPrologue) throws Exception {
@@ -1295,7 +1319,8 @@ public abstract class Node {
 		}
 	}
 
-	// return value is number of nodes created on this level?
+	// return value is number of nodes created on this level
+        // (i.e. trace-opcodes read, not counting recursion)
 	static private int build_tree_until(TraceProcessor[] processors, Node parent, int stop) throws Exception{
 		final DataInputStream s = stream;
 

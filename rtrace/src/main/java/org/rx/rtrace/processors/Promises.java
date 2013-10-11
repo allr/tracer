@@ -337,22 +337,32 @@ public class Promises extends BasicProcessor {
 			PromiseInfo stat = getFunctionStats();
 
 			if(p_sid == null){
+                                // no promise with this ID in list, may indicate bug? -ik
 				add_promise(id);
 				stat.eval_before_seen++;
 			} else {
 				PromiseVisitor c_visitor = this;
 				boolean downward = false;
 
+                                /* walk chain of visitors upward until
+                                   visitor's "stack ID" matches the one of the promise
+                                   (or end of chain)
+                                */
 				do{
 					if(p_sid == c_visitor.sid)
 						downward = true;
 				}while((!downward) && (c_visitor = c_visitor.parent) != null);
 
-				if(downward){
+				if(downward){ // found promise in chain
+                                        /* promise was created in same or higher level */
 					stat.downward_eval ++;
 					if(c_visitor == this || c_visitor == parent)
+                                                /* why count parent as same level? */
 						stat.samelevel_eval ++;
 				}else
+                                        /* promise was created outside current chain,
+                                           means creation in lower level? -ik
+                                        */
 					stat.upward_eval ++;
 				
 //				int dst = stackid - promise_distance.get(id);
@@ -360,6 +370,8 @@ public class Promises extends BasicProcessor {
 //				if(old_nb == null)
 //					old_nb = 0;
 //				distance.put(dst, old_nb + 1);
+
+                                /* count in number of eval'd promises */
 				stat.evaluated ++;
 			}
 
@@ -367,8 +379,11 @@ public class Promises extends BasicProcessor {
 			promises_unevaled.remove(id);
 			if(node.getParent() instanceof Node.AbsPromise)
 				stat.rewrapped ++;
+
+                        // check if the promise node has no nodes below it
 			if(node.getBody() == 0)
 				stat.ghost_promises++;
+
 			enclosed_promise --;
 		}
 
