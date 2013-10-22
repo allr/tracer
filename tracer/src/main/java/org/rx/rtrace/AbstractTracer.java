@@ -290,6 +290,7 @@ abstract class AbstractTracer implements Tracer {
 					"--no-save",
 					"--slave",
 					"--time=" + outputFile.getPath(),
+                                        "--timeR-verbose",
 					"-f", trace.getSourceFile().getPath(),
 					"--args", trace.getRunCmdArgs());
 		}
