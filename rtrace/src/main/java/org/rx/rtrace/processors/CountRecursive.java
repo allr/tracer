@@ -59,11 +59,13 @@ public class CountRecursive extends BasicProcessor {
 			stmt = conn.prepareStatement("insert into recursives (trace_id, location_id, nb) "+
 					"values ("+id+", ? , ?)");
 			try {
+                                // dump map to database
 				for(int key: map.keySet()){
 					stmt.setInt(1, key);
 					stmt.setInt(2, map.get(key));
 					stmt.addBatch();
 				}
+                                // add a special entry for "Recall"
 				stmt.setInt(1, recall_id);
 				stmt.setInt(2, recall_count);
 				stmt.addBatch();
@@ -84,20 +86,25 @@ public class CountRecursive extends BasicProcessor {
 		return new NodeVisitorAdapter() {
 			@Override
 			public void visit_apply_call(FunctionCall node) throws Exception {
-				int id = node.getID();
+				int id = node.getID();  // location_id
 				if(id == DataBase.UNKNOWN_LOCATION)
 					return;
 				Node current = node;
+                                // walk node chain upward
 				while((current = current.getParent()) != null) {
 					if(current instanceof AbsCall){
 						AbsCall cnode = (AbsCall) current; 
+                                                // check if id of node from list is same as @node
 						if(cnode.getID() == id){
+                                                        // if so, count as recursive call
 							recursive_calls ++;
 							Integer count = map.get(id);
+                                                        // count number of recursions by location
 							if(count == null)
 								map.put(id, 1);
 							else
 								map.put(id, count + 1);
+                                                        // stop after first hit
 							break;
 						}
 					}
@@ -106,7 +113,7 @@ public class CountRecursive extends BasicProcessor {
 			@Override
 			public void visit_apply_special(SpecialCall node) throws Exception {
 				int id = node.getID();
-				if(id == recall_id)
+				if(id == recall_id) // check for use of Recall
 					recall_count ++;
 			}
 		};
