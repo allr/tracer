@@ -272,15 +272,17 @@ CREATE VIEW vector_details AS
     CAST(allocatedsmallvectors_size AS REAL) as small_totalsize_bytes,
     CAST(allocatedlargevectors_size AS REAL) as large_totalsize_bytes,
 
-    ROUND(100 * allocatedonevectors_size / CAST(allocatedvectors_size AS REAL), 4)
+    100 * allocatedonevectors_size / CAST(allocatedvectors_size AS REAL)
       AS one_byte_percentage_of_allvectors,
-    ROUND(100 * allocatedsmallvectors_size / CAST(allocatedvectors_size AS REAL), 4)
+    100 * allocatedsmallvectors_size / CAST(allocatedvectors_size AS REAL)
       AS small_byte_percentage_of_allvectors,
-    ROUND(100 * allocatedlargevectors_size / CAST(allocatedvectors_size AS REAL), 4)
+    100 * allocatedlargevectors_size / CAST(allocatedvectors_size AS REAL)
       AS large_byte_percentage_of_allvectors,
     -- FIXME: Ist hier auch als Prozentwert des Gesamtspeichers
     -- inkl. SEXP-Headern gewünscht?
 
+    ROUND(100 * allocatednullvectors_tl / CAST(allocatedvectors_tl AS REAL), 4)
+      AS null_count_percentage_of_allvectors,
     ROUND(100 * allocatedonevectors_tl / CAST(allocatedvectors_tl AS REAL), 4)
       AS one_count_percentage_of_allvectors,
     ROUND(100 * allocatedsmallvectors_tl / CAST(allocatedvectors_tl AS REAL), 4)

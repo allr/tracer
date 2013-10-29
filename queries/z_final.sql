@@ -144,6 +144,7 @@ create view vector_ratios_temp as
   where traces.id = summary.id
   order by summary.id;
 
+-- relative vector sizes, by allocated memory
 drop view if exists vector_ratios;
 create view vector_ratios as
   select
@@ -162,8 +163,24 @@ UNION ALL
   from vector_ratios_temp
 order by name;
 
+-- clone of vector_ratios with a nicer name for the demo scripts
+drop view if exists vector_sizes;
+create view vector_sizes as select * from vector_ratios;
 
--- Neuer View für Berechnung des Mittelwertes
+-- relative vector counts (i.e. number of vectors, not elements)
+DROP VIEW IF EXISTS vector_counts;
+CREATE VIEW vector_counts AS
+  SELECT
+    name,
+    null_count_percentage_of_allvectors AS null_count_pct,
+    one_count_percentage_of_allvectors AS one_count_pct,
+    small_count_percentage_of_allvectors AS small_count_pct,
+    large_count_percentage_of_allvectors AS large_count_pct
+  FROM vector_details
+  ORDER BY name;
+
+
+-- calculate average of all runtimes
 DROP VIEW IF EXISTS runtime_average;
 CREATE VIEW runtime_average AS
   SELECT
@@ -225,13 +242,16 @@ CREATE VIEW number_of_args_pct AS
 -- SELECT sum(percentage_of_calls) FROM number_of_args_pct WHERE number_of_args >= X AND number_of_args <= Y;
 
 
--- reduced version of vector_details for demo purposes
-DROP VIEW IF EXISTS vector_details_lite;
-CREATE VIEW vector_details_lite AS
+-- total runtimes, converted from nanoseconds to seconds
+DROP VIEW IF EXISTS total_runtimes;
+CREATE VIEW total_runtimes AS
   SELECT
     name,
-    one_count_percentage_of_allvectors AS one_count_pct,
-    small_count_percentage_of_allvectors AS small_count_pct,
-    large_count_percentage_of_allvectors AS large_count_pct
-  FROM vector_details
-  ORDER BY name;
+    totalruntime / 1e9 as totalruntime_seconds
+    FROM time_summary LEFT JOIN traces
+    WHERE traces.id = time_summary.id
+  UNION ALL SELECT
+    " Average",
+    SUM(totalruntime / 1e9) / cast(count(totalruntime) AS REAL)
+    FROM time_summary
+  ORDER BY NAME;
