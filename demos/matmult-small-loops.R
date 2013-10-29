@@ -4,7 +4,7 @@ randommatrix <- function (n,m) {
   matrix(rnorm(n*m, mean=1, sd=1), n, m)
 }
 
-SIZE <- 100
+SIZE <- 150
 
 a <- randommatrix(SIZE, SIZE)
 b <- randommatrix(SIZE, SIZE)
