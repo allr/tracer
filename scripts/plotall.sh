@@ -10,11 +10,11 @@ mkdir -p plots
 for table in $PLOTTABLES_PCT; do
     echo Generating plot for $table
     sqlite3 -csv -header db.db "select * from $table" > plots/$table.csv
-    $BASEDIR/timed/bin/Rscript $BASEDIR/scripts/plotcsv.R plots/$table.csv plots/$table.pdf pctstack
+    $BASEDIR/scripts/plotcsv.pl --stacked --maxrange 100 plots/$table.csv plots/$table.pdf
 done
 
 for table in $PLOTTABLES_NORM; do
     echo Generating plot for $table
     sqlite3 -csv -header db.db "select * from $table" > plots/$table.csv
-    $BASEDIR/timed/bin/Rscript $BASEDIR/scripts/plotcsv.R plots/$table.csv plots/$table.pdf
+    $BASEDIR/scripts/plotcsv.pl plots/$table.csv plots/$table.pdf
 done

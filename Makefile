@@ -52,6 +52,8 @@ real-install: all
 	$(Q)./fixpath.sh $(REALPREFIX)/tracer.sh $(REALPREFIX)
 	$(Q)./fixpath.sh $(REALPREFIX)/demos/rundemos.sh $(REALPREFIX)
 	$(Q)./fixpath.sh $(REALPREFIX)/scripts/plotall.sh $(REALPREFIX)
+# fix permissions for non-fixpath scripts
+	$(Q)chmod +x $(REALPREFIX)/scripts/plotcsv.pl
 
 
 # error message if no PREFIX is specified
