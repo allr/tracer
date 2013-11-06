@@ -34,9 +34,14 @@ real-install: all
 # copy jar
 	$(E) "  CP      tracer.jar"
 	$(Q)cp $(TRACER_JAR) $(REALPREFIX)/tracer.jar
-# copy sample queries
+# copy sample queries (and remove the old ones)
 	$(E) "  CP      queries"
 	$(Q)mkdir -p $(REALPREFIX)/queries
+	$(Q)rm -f $(REALPREFIX)/queries/000_symbols.sql
+	$(Q)rm -f $(REALPREFIX)/queries/010_pivots.sql
+	$(Q)rm -f $(REALPREFIX)/queries/020_analyses.sql
+	$(Q)rm -f $(REALPREFIX)/queries/tutorial_queries.sql
+	$(Q)rm -f $(REALPREFIX)/queries/z_final.sql
 	$(Q)cp queries/* $(REALPREFIX)/queries
 # copy sample programs
 	$(E) "  CP      demos"

@@ -1,7 +1,147 @@
--- runtime as percentage of total
+-- memory usage, slightly reorganized for better readability
+DROP VIEW IF EXISTS memory_used;
+CREATE VIEW IF NOT EXISTS memory_used AS
+
+SELECT
+    name,
+    rusagemaxresidentmemoryset * 1024 as RUsageMemory_bytes,
+    (allocatedcons - allocatedlist_elts * 56) as cons_bytes,
+    allocatedpromises as promises_bytes,
+    allocatedenv as env_bytes,
+    allocatedexternal as external_bytes,
+    allocatedsxp + allocatednoncons as sexp_bytes,
+    allocatedlist_elts * 56 as lists_bytes,
+    allocatedlist_tl as lists_count,
+    ROUND(allocatedlist_elts / CAST(allocatedlist_tl AS REAL), 4) as lists_avg_elts,
+
+    allocatedlargevectors_size as largevec_bytes,
+    allocatedlargevectors_tl   as largevec_count,
+    allocatedlargevectors_elts as largevec_elements,
+
+    allocatedsmallvectors_size as smallvec_bytes,
+    allocatedsmallvectors_tl   as smallvec_count,
+    allocatedsmallvectors_elts as smallvec_elements,
+
+    allocatedonevectors_size   as onevec_bytes,
+    allocatedonevectors_tl     as onevec_count,
+    allocatedonevectors_elts   as onevec_elements,
+
+    allocatednullvectors_size  as nullvec_bytes,
+    allocatednullvectors_tl    as nullvec_count,
+    allocatednullvectors_elts  as nullvec_elements,
+
+    allocatedstringbuffer_size as stringbuffer_bytes_roundedup,
+    allocatedstringbuffer_elts as stringbuffer_bytes_needed,
+    allocatedstringbuffer_tl   as stringbuffer_count,
+
+    -- sum of all byte values to simplify the percentage view
+    allocatedcons + allocatedpromises + allocatedenv +
+    allocatedsxp + allocatednoncons +
+    -- calculate size of list headers
+    (allocatedlargevectors_tl + allocatedsmallvectors_tl +
+     allocatedonevectors_tl + allocatednullvectors_tl) * 56 +
+    allocatedexternal + allocatedlargevectors_size +
+    allocatedsmallvectors_size + allocatedonevectors_size +
+    allocatednullvectors_size + allocatedstringbuffer_size
+      AS total_bytes
+FROM summary
+left join traces
+where traces.id = summary.id
+order by summary.id;
+
+
 --
-DROP VIEW IF EXISTS running_time_details_pct_new;
-CREATE VIEW running_time_details_pct_new AS
+-- detail view for vector sizes and counts
+--
+-- Note: Bytes only for the data itself, NO HEADERS!
+DROP VIEW IF EXISTS vector_details;
+CREATE VIEW vector_details AS
+  SELECT
+    traces.name,
+
+    ROUND(allocatedvectors_elts / CAST(allocatedvectors_tl AS REAL), 4)
+      AS all_avg_elements_per_vector,
+    ROUND(allocatedvectors_size / CAST(allocatedvectors_tl AS REAL), 4)
+      AS all_avg_bytes_per_vector,
+    ROUND(allocatedvectors_size / CAST(allocatedvectors_elts AS REAL), 4)
+      AS all_avg_bytes_per_element,
+
+    ROUND(allocatedonevectors_elts / CAST(allocatedonevectors_tl AS REAL), 4)
+      AS one_avg_elements_per_vector,
+    ROUND(allocatedonevectors_size / CAST(allocatedonevectors_tl AS REAL), 4)
+      AS one_avg_bytes_per_vector,
+    ROUND(allocatedonevectors_size / CAST(allocatedonevectors_elts AS REAL), 4)
+      AS one_avg_bytes_per_element,
+
+    ROUND(allocatedsmallvectors_elts / CAST(allocatedsmallvectors_tl AS REAL), 4)
+      AS small_avg_elements_per_vector,
+    ROUND(allocatedsmallvectors_size / CAST(allocatedsmallvectors_tl AS REAL), 4)
+      AS small_avg_bytes_per_vector,
+    ROUND(allocatedsmallvectors_size / CAST(allocatedsmallvectors_elts AS REAL), 4)
+      AS small_avg_bytes_per_element,
+
+    ROUND(allocatedlargevectors_elts / CAST(allocatedlargevectors_tl AS REAL), 4)
+      AS large_avg_elements_per_vector,
+    ROUND(allocatedlargevectors_size / CAST(allocatedlargevectors_tl AS REAL), 4)
+      AS large_avg_bytes_per_vector,
+    ROUND(allocatedlargevectors_size / CAST(allocatedlargevectors_elts AS REAL), 4)
+      AS large_avg_bytes_per_element,
+
+    CAST(allocatedvectors_size AS REAL)      as all_totalsize_bytes,
+    CAST(allocatedonevectors_size AS REAL)   as one_totalsize_bytes,
+    CAST(allocatedsmallvectors_size AS REAL) as small_totalsize_bytes,
+    CAST(allocatedlargevectors_size AS REAL) as large_totalsize_bytes,
+
+    100 * allocatedonevectors_size / CAST(allocatedvectors_size AS REAL)
+      AS one_byte_pct_of_allvectors,
+    100 * allocatedsmallvectors_size / CAST(allocatedvectors_size AS REAL)
+      AS small_byte_pct_of_allvectors,
+    100 * allocatedlargevectors_size / CAST(allocatedvectors_size AS REAL)
+      AS large_byte_pct_of_allvectors,
+
+    ROUND(100 * allocatednullvectors_tl / CAST(allocatedvectors_tl AS REAL), 4)
+      AS null_count_pct_of_allvectors,
+    ROUND(100 * allocatedonevectors_tl / CAST(allocatedvectors_tl AS REAL), 4)
+      AS one_count_pct_of_allvectors,
+    ROUND(100 * allocatedsmallvectors_tl / CAST(allocatedvectors_tl AS REAL), 4)
+      AS small_count_pct_of_allvectors,
+    ROUND(100 * allocatedlargevectors_tl / CAST(allocatedvectors_tl AS REAL), 4)
+      AS large_count_pct_of_allvectors
+
+  FROM summary
+  LEFT JOIN traces ON traces.id = summary.id
+  ORDER BY summary.id
+;
+
+--
+-- external C code vs. stuff in the interpreter
+--
+DROP VIEW IF EXISTS external_vs_interpreter;
+CREATE VIEW external_vs_interpreter AS
+  SELECT
+    traces.name,
+    dotexternal_self + dotcall_self +
+      dotc_self + dotfortran_self AS external_code_time,
+    totalruntime - dotexternal_self - dotcall_self -
+      dotc_self - dotfortran_self AS interpreter_time
+  FROM time_summary
+  LEFT JOIN traces on traces.id = time_summary.id
+  ORDER BY time_summary.id
+;    
+
+DROP VIEW IF EXISTS external_vs_interpreter_pct;
+CREATE VIEW external_vs_interpreter_pct AS
+SELECT
+  name,
+  ROUND(100 * interpreter_time / CAST( (interpreter_time + external_code_time) AS REAL ), 4) AS R_Code,
+  ROUND(100 * external_code_time / CAST( (interpreter_time + external_code_time)  AS REAL ), 4) AS Ex_Code
+  FROM external_vs_interpreter
+;
+
+-- categorized runtimes as percentage of total
+--
+DROP VIEW IF EXISTS runtime_details_pct;
+CREATE VIEW runtime_details_pct AS
   SELECT
     name,
     ROUND(100 * (dotC_self + dotFortran_self + dotCall_self +
@@ -53,8 +193,9 @@ CREATE VIEW running_time_details_pct_new AS
   FROM time_summary
 order by name;
 
---order by time_summary.id;
-
+--
+-- memory allocations: total and os-reported maximum
+--
 DROP VIEW IF EXISTS memory_used_vs_alloc;
 CREATE VIEW memory_used_vs_alloc AS
 SELECT
@@ -78,7 +219,6 @@ UNION ALL SELECT
   " Average",
     sum(rusagemaxresidentmemoryset) / 1024.0 / cast(count(rusagemaxresidentmemoryset) as real)
       as RUsageMemory_mbytes,
-    -- sum of all byte values to simplify the percentage view
     (sum(allocatedcons) + sum(allocatedpromises) + sum(allocatedenv) +
     sum(allocatedsxp) + sum(allocatednoncons) +
     -- calculate size of list headers
@@ -93,10 +233,11 @@ UNION ALL SELECT
 
 order by name;
 
+--
 -- memory usage in percent of total bytes used
 --
-DROP VIEW IF EXISTS memory_used_pct_new;
-CREATE VIEW memory_used_pct_new AS
+DROP VIEW IF EXISTS memory_used_pct;
+CREATE VIEW memory_used_pct AS
 
   SELECT
     name,
@@ -130,9 +271,9 @@ REAL), 4),
       CAST(SUM(total_bytes) AS REAL), 4)
   FROM memory_used ORDER BY name;
 
--- helper view to simplify the formulation of vector_ratios
-drop view if exists vector_ratios_temp;
-create view vector_ratios_temp as
+-- helper view to simplify the formulation of vector_sizes
+drop view if exists vector_sizes_helperview;
+create view vector_sizes_helperview as
   select
     name,
     allocatedlargevectors_size + 56 * allocatedlargevectors_tl as large_bytes,
@@ -145,101 +286,36 @@ create view vector_ratios_temp as
   order by summary.id;
 
 -- relative vector sizes, by allocated memory
-drop view if exists vector_ratios;
-create view vector_ratios as
+drop view if exists vector_sizes;
+create view vector_sizes as
   select
     name,
-    -- round(100 * null_bytes / cast(total_bytes as real), 2) as null_percentage,
-    round(100 * one_bytes / cast(total_bytes as real), 2) as one_percentage,
-    round(100 * small_bytes / cast(total_bytes as real), 2) as small_percentage,
-    round(100 * large_bytes / cast(total_bytes as real), 2) as large_percentage
-  from vector_ratios_temp
+    round(100 * null_bytes / cast(total_bytes as real), 2) as null_pct,
+    round(100 * one_bytes / cast(total_bytes as real), 2) as one_pct,
+    round(100 * small_bytes / cast(total_bytes as real), 2) as small_pct,
+    round(100 * large_bytes / cast(total_bytes as real), 2) as large_pct
+  from vector_sizes_helperview
 UNION ALL
   SELECT
     " Average",
+    round(100 * sum(null_bytes) / cast(sum(total_bytes) as real), 2),
     round(100 * sum(one_bytes) / cast(sum(total_bytes) as real), 2),
     round(100 * sum(small_bytes) / cast(sum(total_bytes) as real), 2),
     round(100 * sum(large_bytes) / cast(sum(total_bytes) as real), 2)
-  from vector_ratios_temp
+  from vector_sizes_helperview
 order by name;
-
--- clone of vector_ratios with a nicer name for the demo scripts
-drop view if exists vector_sizes;
-create view vector_sizes as select * from vector_ratios;
 
 -- relative vector counts (i.e. number of vectors, not elements)
 DROP VIEW IF EXISTS vector_counts;
 CREATE VIEW vector_counts AS
   SELECT
     name,
-    null_count_percentage_of_allvectors AS null_count_pct,
-    one_count_percentage_of_allvectors AS one_count_pct,
-    small_count_percentage_of_allvectors AS small_count_pct,
-    large_count_percentage_of_allvectors AS large_count_pct
+    null_count_pct_of_allvectors AS null_count_pct,
+    one_count_pct_of_allvectors AS one_count_pct,
+    small_count_pct_of_allvectors AS small_count_pct,
+    large_count_pct_of_allvectors AS large_count_pct
   FROM vector_details
   ORDER BY name;
-
-
--- calculate average of all runtimes
-DROP VIEW IF EXISTS runtime_average;
-CREATE VIEW runtime_average AS
-  SELECT
-    name,
-    ROUND((dotC_self + dotFortran_self + dotCall_self +
-      dotExternal_self ), 4) AS External,
-    ROUND(( FunLookup_self + SymLookup_self +
-      FindVarInFrame3other_self ) , 4) AS Lookup,
-    ROUND( Match_self , 4) AS Match,
-    ROUND( Duplicate_self , 4) AS Duplicate,
-    ROUND( gcinternal_self, 4) AS GC,
-    ROUND( (cons_self + allocList_self + allocVector_self ), 4) AS MemAlloc,
-    ROUND( (dosubset_self + dosubset2_self + dosubset3_self) , 4) AS Subset,
-    ROUND( EvalList_self , 4) AS Eval,
-    ROUND( (doarith_self + domatprod_self + dologic_self +
-     dologic2_self + dorelop_self ), 4) AS Arith,
-    ROUND( (builtinsum_self + specialsum_self + dotSpecial2_self) , 4) AS BuiltIn_Special,
-    ROUND( (startup_self+install_self+Repl_self+userfunctionsum_self+setupmainloop_self+endmainloop_self+gzfile_self), 4) AS Other,
-    totalruntime
-  FROM time_summary
-  left join traces
-  where traces.id=time_summary.id
-  order by external desc;
-
-
--- Vector allocation counts, relative
-DROP VIEW IF EXISTS relative_vector_alloc_counts;
-CREATE VIEW relative_vector_alloc_counts AS
-  select
-    name,
-    round(100 * allocatedonevectors_tl / cast((allocatedsmallvectors_tl + allocatedonevectors_tl + allocatedlargevectors_tl) as real), 2) as one_vec_count,
-    round(100 * allocatedsmallvectors_tl / cast((allocatedsmallvectors_tl + allocatedonevectors_tl + allocatedlargevectors_tl) as real), 2) as small_vec_count,
-    round(100 * allocatedlargevectors_tl / cast((allocatedsmallvectors_tl + allocatedonevectors_tl + allocatedlargevectors_tl) as real), 2) as large_vec_count
-
-  from summary left join traces
-  where traces.id = summary.id
-UNION ALL
-  select
-    " Average",
-    round(100 * sum(allocatedonevectors_tl) / cast(sum(allocatedsmallvectors_tl + allocatedonevectors_tl + allocatedlargevectors_tl) as real), 2),
-    round(100 * sum(allocatedsmallvectors_tl) / cast(sum(allocatedsmallvectors_tl + allocatedonevectors_tl + allocatedlargevectors_tl) as real), 2),
-    round(100 * sum(allocatedlargevectors_tl) / cast(sum(allocatedsmallvectors_tl + allocatedonevectors_tl + allocatedlargevectors_tl) as real), 2)
-  from summary
- order by name;
-
--- drop old view
-DROP VIEW IF EXISTS relative_vector_alloc_counts_overall;
-
-
--- number of args as percentages
-DROP VIEW IF EXISTS number_of_args_pct;
-CREATE VIEW number_of_args_pct AS
-  select
-    value as number_of_args,
-    100 * param / cast((SELECT sum(param) from number_of_args) as real) as percentage_of_calls
-  from number_of_args
-  order by number_of_args;
--- to get values for "X to Y args", use
--- SELECT sum(percentage_of_calls) FROM number_of_args_pct WHERE number_of_args >= X AND number_of_args <= Y;
 
 
 -- total runtimes, converted from nanoseconds to seconds
