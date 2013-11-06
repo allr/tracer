@@ -3,7 +3,7 @@
 # NOTE: Update this for your installation!
 BASEDIR="$HOME/some/dir/"
 
-PLOTTABLES_PCT="runtime_details_pct memory_used_pct vector_sizes vector_counts"
+PLOTTABLES_PCT="runtime_details_pct memory_used_pct vector_sizes_pct vector_counts"
 PLOTTABLES_NORM="memory_used_vs_alloc total_runtimes"
 
 mkdir -p plots

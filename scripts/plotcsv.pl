@@ -128,7 +128,7 @@ EOT
 
 if ($plot_stacked) {
   say PLOT "set style histogram rowstacked";
-  say PLOT "set key inverted";
+  say PLOT "set key invert";
 }
 
 # create line styles with non-repeated colors

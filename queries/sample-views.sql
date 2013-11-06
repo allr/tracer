@@ -59,6 +59,8 @@ CREATE VIEW vector_details AS
   SELECT
     traces.name,
 
+    -- elem/vec, byte/vec, byte/elem
+
     ROUND(allocatedvectors_elts / CAST(allocatedvectors_tl AS REAL), 4)
       AS all_avg_elements_per_vector,
     ROUND(allocatedvectors_size / CAST(allocatedvectors_tl AS REAL), 4)
@@ -87,16 +89,13 @@ CREATE VIEW vector_details AS
     ROUND(allocatedlargevectors_size / CAST(allocatedlargevectors_elts AS REAL), 4)
       AS large_avg_bytes_per_element,
 
-    CAST(allocatedvectors_size AS REAL)      as all_totalsize_bytes,
-    CAST(allocatedonevectors_size AS REAL)   as one_totalsize_bytes,
-    CAST(allocatedsmallvectors_size AS REAL) as small_totalsize_bytes,
-    CAST(allocatedlargevectors_size AS REAL) as large_totalsize_bytes,
+    --- percentages
 
-    100 * allocatedonevectors_size / CAST(allocatedvectors_size AS REAL)
+    ROUND(100 * allocatedonevectors_size / CAST(allocatedvectors_size AS REAL), 4)
       AS one_byte_pct_of_allvectors,
-    100 * allocatedsmallvectors_size / CAST(allocatedvectors_size AS REAL)
+    ROUND(100 * allocatedsmallvectors_size / CAST(allocatedvectors_size AS REAL), 4)
       AS small_byte_pct_of_allvectors,
-    100 * allocatedlargevectors_size / CAST(allocatedvectors_size AS REAL)
+    ROUND(100 * allocatedlargevectors_size / CAST(allocatedvectors_size AS REAL), 4)
       AS large_byte_pct_of_allvectors,
 
     ROUND(100 * allocatednullvectors_tl / CAST(allocatedvectors_tl AS REAL), 4)
@@ -271,9 +270,9 @@ REAL), 4),
       CAST(SUM(total_bytes) AS REAL), 4)
   FROM memory_used ORDER BY name;
 
--- helper view to simplify the formulation of vector_sizes
-drop view if exists vector_sizes_helperview;
-create view vector_sizes_helperview as
+-- memory allocated to the four vector classes
+drop view if exists vector_sizes;
+create view vector_sizes as
   select
     name,
     allocatedlargevectors_size + 56 * allocatedlargevectors_tl as large_bytes,
@@ -286,15 +285,15 @@ create view vector_sizes_helperview as
   order by summary.id;
 
 -- relative vector sizes, by allocated memory
-drop view if exists vector_sizes;
-create view vector_sizes as
+drop view if exists vector_sizes_pct;
+create view vector_sizes_pct as
   select
     name,
     round(100 * null_bytes / cast(total_bytes as real), 2) as null_pct,
     round(100 * one_bytes / cast(total_bytes as real), 2) as one_pct,
     round(100 * small_bytes / cast(total_bytes as real), 2) as small_pct,
     round(100 * large_bytes / cast(total_bytes as real), 2) as large_pct
-  from vector_sizes_helperview
+  from vector_sizes
 UNION ALL
   SELECT
     " Average",
@@ -302,7 +301,7 @@ UNION ALL
     round(100 * sum(one_bytes) / cast(sum(total_bytes) as real), 2),
     round(100 * sum(small_bytes) / cast(sum(total_bytes) as real), 2),
     round(100 * sum(large_bytes) / cast(sum(total_bytes) as real), 2)
-  from vector_sizes_helperview
+  from vector_sizes
 order by name;
 
 -- relative vector counts (i.e. number of vectors, not elements)
