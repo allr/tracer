@@ -82,6 +82,7 @@ open IN, "<", $input_file or die "Can't open $input_file: $!";
 my $headerline = <IN>;
 chomp $headerline;
 my @headers = split /[,;]/, $headerline;
+@headers = map { /^\"/ ? $_ : "\"$_\"" }  @headers;
 
 # read data lines
 my @data;
@@ -94,6 +95,9 @@ while (<IN>) {
         $e =~ s/^\"(.*)\"$/$1/;
     }
 
+    # quote the first element (effectively escaping a leading "e")
+    $linedata[0] = "\"$linedata[0]\"";
+
     push @data, \@linedata;
 }
 
@@ -104,8 +108,7 @@ my $columns = scalar(@headers) - 1;
 #say "Columns: $columns";
 
 # run gnuplot
-open PLOT,"|-","gnuplot" or die "FAIL:FIXME";
-#open PLOT,">",$output_file or die "FAIL:FIXME";
+open PLOT,"|-","gnuplot" or die "ERROR: Failed to run gnuplot: $!";
 if ($plot_pdf) {
     say PLOT "set terminal pdf";
 } else {
