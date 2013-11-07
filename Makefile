@@ -14,7 +14,7 @@ all:
 	$(E) "  MVN     clean install"
 	$(Q)mvn clean install -Dproject.build.sourceEncoding=UTF-8
 	$(E) "  CP      $(TRACER_JAR)"
-	$(Q)cp tracer/target/$(TRACER_JAR) .
+	$(Q)cp tracer/target/$(TRACER_JAR) tracer.jar
 
 clean:
 	mvn clean -Dproject.build.sourceEncoding=UTF-8
@@ -33,7 +33,7 @@ real-install: all
 	$(Q)mkdir -p $(REALPREFIX)
 # copy jar
 	$(E) "  CP      tracer.jar"
-	$(Q)cp $(TRACER_JAR) $(REALPREFIX)/tracer.jar
+	$(Q)cp tracer.jar $(REALPREFIX)/tracer.jar
 # copy sample queries (and remove the old ones)
 	$(E) "  CP      queries"
 	$(Q)mkdir -p $(REALPREFIX)/queries
