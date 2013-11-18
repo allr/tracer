@@ -58,7 +58,7 @@ public class TraceSummary extends Summary {
 		new TraceMultiInfo("AllocatedSmallVectors", new String[]{"tl", "elts", "size", "asize"}),
 		new TraceMultiInfo("AllocatedLargeVectors", new String[]{"tl", "elts", "size", "asize"}),
 		new TraceMultiInfo("AllocatedOneVectors", new String[]{"tl", "elts", "size", "asize"}),
-		new TraceMultiInfo("AllocatedNullVectors", new String[]{"tl", "elts", "size", "asize"}),
+		new TraceMultiInfo("AllocatedZeroVectors", new String[]{"tl", "elts", "size", "asize"}),
 		new TraceMultiInfo("AllocatedStringBuffer", new String[]{"tl", "elts", "size"}),
 		//new TraceMultiInfo("AllocatedObjects", new String[]{"tl", "elts", "size"}),
 		new TraceMultiInfo("Duplicate", new String[]{"tl", "elts", "elts1"}),
@@ -76,7 +76,7 @@ public class TraceSummary extends Summary {
 		new TraceInfo("GCCons"),
                 new TraceMultiInfo("AvoidedDup", new String[]{"avoided","needed"}),
 //		new TraceMultiInfo("ScalarVector", new String[]{"int", "lgl", "cplx", "real", "str", "expr", "vec", "raw", "total"}),
-//		new TraceMultiInfo("NullVector", new String[]{"int", "lgl", "cplx", "real", "str", "expr", "vec", "raw", "total"}),
+//		new TraceMultiInfo("ZeroVector", new String[]{"int", "lgl", "cplx", "real", "str", "expr", "vec", "raw", "total"}),
 //		new TraceMultiInfo("TrueVector", new String[]{"int", "lgl", "cplx", "real", "str", "expr", "vec", "raw", "total"})
 	};
 	

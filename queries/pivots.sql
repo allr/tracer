@@ -60,11 +60,11 @@ UNION ALL
 SELECT
 summary.id,
 name,
-"nullvectors",
-allocatednullvectors_tl,
-allocatednullvectors_elts,
-allocatednullvectors_size,
-allocatednullvectors_asize
+"zerovectors",
+allocatedzerovectors_tl,
+allocatedzerovectors_elts,
+allocatedzerovectors_size,
+allocatedzerovectors_asize
 FROM summary left join tasks on tasks.id=summary.id
 
 UNION ALL

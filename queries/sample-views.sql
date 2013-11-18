@@ -26,9 +26,9 @@ SELECT
     allocatedonevectors_tl     as onevec_count,
     allocatedonevectors_elts   as onevec_elements,
 
-    allocatednullvectors_size  as nullvec_bytes,
-    allocatednullvectors_tl    as nullvec_count,
-    allocatednullvectors_elts  as nullvec_elements,
+    allocatedzerovectors_size  as zerovec_bytes,
+    allocatedzerovectors_tl    as zerovec_count,
+    allocatedzerovectors_elts  as zerovec_elements,
 
     allocatedstringbuffer_size as stringbuffer_bytes_roundedup,
     allocatedstringbuffer_elts as stringbuffer_bytes_needed,
@@ -39,10 +39,10 @@ SELECT
     allocatedsxp + allocatednoncons +
     -- calculate size of list headers
     (allocatedlargevectors_tl + allocatedsmallvectors_tl +
-     allocatedonevectors_tl + allocatednullvectors_tl) * 56 +
+     allocatedonevectors_tl + allocatedzerovectors_tl) * 56 +
     allocatedexternal + allocatedlargevectors_size +
     allocatedsmallvectors_size + allocatedonevectors_size +
-    allocatednullvectors_size + allocatedstringbuffer_size
+    allocatedzerovectors_size + allocatedstringbuffer_size
       AS total_bytes
 FROM summary
 left join traces
@@ -98,8 +98,8 @@ CREATE VIEW vector_details AS
     ROUND(100 * allocatedlargevectors_size / CAST(allocatedvectors_size AS REAL), 4)
       AS large_byte_pct_of_allvectors,
 
-    ROUND(100 * allocatednullvectors_tl / CAST(allocatedvectors_tl AS REAL), 4)
-      AS null_count_pct_of_allvectors,
+    ROUND(100 * allocatedzerovectors_tl / CAST(allocatedvectors_tl AS REAL), 4)
+      AS zero_count_pct_of_allvectors,
     ROUND(100 * allocatedonevectors_tl / CAST(allocatedvectors_tl AS REAL), 4)
       AS one_count_pct_of_allvectors,
     ROUND(100 * allocatedsmallvectors_tl / CAST(allocatedvectors_tl AS REAL), 4)
@@ -205,10 +205,10 @@ SELECT
     allocatedsxp + allocatednoncons +
     -- calculate size of list headers
     (allocatedlargevectors_tl + allocatedsmallvectors_tl +
-     allocatedonevectors_tl + allocatednullvectors_tl) * 56 +
+     allocatedonevectors_tl + allocatedzerovectors_tl) * 56 +
     allocatedexternal + allocatedlargevectors_size +
     allocatedsmallvectors_size + allocatedonevectors_size +
-    allocatednullvectors_size + allocatedstringbuffer_size) / 1024.0 / 1024.0
+    allocatedzerovectors_size + allocatedstringbuffer_size) / 1024.0 / 1024.0
       AS total_mbytes
   FROM summary
   left join traces
@@ -222,10 +222,10 @@ UNION ALL SELECT
     sum(allocatedsxp) + sum(allocatednoncons) +
     -- calculate size of list headers
     (sum(allocatedlargevectors_tl) + sum(allocatedsmallvectors_tl) +
-     sum(allocatedonevectors_tl) + sum(allocatednullvectors_tl)) * 56 +
+     sum(allocatedonevectors_tl) + sum(allocatedzerovectors_tl)) * 56 +
     sum(allocatedexternal) + sum(allocatedlargevectors_size) +
     sum(allocatedsmallvectors_size) + sum(allocatedonevectors_size) +
-    sum(allocatednullvectors_size) + sum(allocatedstringbuffer_size)) / 1024.0 / 1024.0
+    sum(allocatedzerovectors_size) + sum(allocatedstringbuffer_size)) / 1024.0 / 1024.0
       / cast(count(allocatedcons) as real)
       AS total_mbytes
   FROM summary
@@ -242,7 +242,7 @@ CREATE VIEW memory_used_pct AS
     name,
     ROUND(100 * ( cons_bytes +  lists_bytes ) / CAST(total_bytes AS REAL),
 4) AS Lists,
-    ROUND(100 * ((nullvec_bytes + 56 * nullvec_count)
+    ROUND(100 * ((zerovec_bytes + 56 * zerovec_count)
     +   (onevec_bytes + 56 * onevec_count)
     +   (smallvec_bytes + 56 * smallvec_count)
     +   (largevec_bytes + 56 * largevec_count))  / CAST(total_bytes AS
@@ -258,7 +258,7 @@ UNION ALL
   SELECT
     " Average",
     ROUND(100 * (SUM(cons_bytes) + SUM(lists_bytes)) / CAST(SUM(total_bytes) as real), 4),
-    ROUND(100 * ((SUM(nullvec_bytes) + 56 * SUM(nullvec_count))
+    ROUND(100 * ((SUM(zerovec_bytes) + 56 * SUM(zerovec_count))
     +   (SUM(onevec_bytes) + 56 * SUM(onevec_count))
     +   (SUM(smallvec_bytes) + 56 * SUM(smallvec_count))
     +   (SUM(largevec_bytes) + 56 * SUM(largevec_count)))  / CAST(SUM(total_bytes) AS
@@ -278,8 +278,8 @@ create view vector_sizes as
     allocatedlargevectors_size + 56 * allocatedlargevectors_tl as large_bytes,
     allocatedsmallvectors_size + 56 * allocatedsmallvectors_tl as small_bytes,
     allocatedonevectors_size + 56 * allocatedonevectors_tl as one_bytes,
-    allocatednullvectors_size + 56 * allocatednullvectors_tl as null_bytes,
-    allocatedvectors_size + 56 * allocatedvectors_tl - allocatednullvectors_size - 56 * allocatednullvectors_tl as total_bytes
+    allocatedzerovectors_size + 56 * allocatedzerovectors_tl as zero_bytes,
+    allocatedvectors_size + 56 * allocatedvectors_tl - allocatedzerovectors_size - 56 * allocatedzerovectors_tl as total_bytes
   from summary left join traces
   where traces.id = summary.id
   order by summary.id;
@@ -289,7 +289,7 @@ drop view if exists vector_sizes_pct;
 create view vector_sizes_pct as
   select
     name,
-    round(100 * null_bytes / cast(total_bytes as real), 2) as null_pct,
+    round(100 * zero_bytes / cast(total_bytes as real), 2) as zero_pct,
     round(100 * one_bytes / cast(total_bytes as real), 2) as one_pct,
     round(100 * small_bytes / cast(total_bytes as real), 2) as small_pct,
     round(100 * large_bytes / cast(total_bytes as real), 2) as large_pct
@@ -297,7 +297,7 @@ create view vector_sizes_pct as
 UNION ALL
   SELECT
     " Average",
-    round(100 * sum(null_bytes) / cast(sum(total_bytes) as real), 2),
+    round(100 * sum(zero_bytes) / cast(sum(total_bytes) as real), 2),
     round(100 * sum(one_bytes) / cast(sum(total_bytes) as real), 2),
     round(100 * sum(small_bytes) / cast(sum(total_bytes) as real), 2),
     round(100 * sum(large_bytes) / cast(sum(total_bytes) as real), 2)
@@ -309,7 +309,7 @@ DROP VIEW IF EXISTS vector_counts;
 CREATE VIEW vector_counts AS
   SELECT
     name,
-    null_count_pct_of_allvectors AS null_count_pct,
+    zero_count_pct_of_allvectors AS zero_count_pct,
     one_count_pct_of_allvectors AS one_count_pct,
     small_count_pct_of_allvectors AS small_count_pct,
     large_count_pct_of_allvectors AS large_count_pct

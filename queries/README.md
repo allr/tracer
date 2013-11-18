@@ -53,7 +53,7 @@ functions on the contents of the database.
     allocations. For every program in the database, the average number
     of elements per vector, number of bytes per vector and number of
     elements per vector are calculated for all, one-element, small and
-    large vectors. Additionally the percentages of null/one/small/large
+    large vectors. Additionally the percentages of zero/one/small/large
     vectors compared to all vectors are calculated for the number of
     bytes and the number of vectors. Byte sizes in this table ignore
     the SEXP header block that the R interpreter creates for each
