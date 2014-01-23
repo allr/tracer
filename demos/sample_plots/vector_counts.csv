@@ -1,0 +1,6 @@
+name,null_count_pct,one_count_pct,small_count_pct,large_count_pct
+mandelbrot,1.1879,19.2378,77.0147,2.5596
+matmult-large,1.1945,19.313,77.1477,2.3448
+matmult-large-na,1.1943,19.3147,77.1398,2.3512
+matmult-small-loops,0.0154,98.826,0.996,0.1626
+matmult-small-op,1.1945,19.3131,77.1476,2.3448
