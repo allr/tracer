@@ -46,11 +46,11 @@ real-install: all
 # copy sample programs
 	$(E) "  CP      demos"
 	$(Q)mkdir -p $(REALPREFIX)/demos
-	$(Q)cp demos/* $(REALPREFIX)/demos
+	$(Q)cp demos/*.* $(REALPREFIX)/demos
 # copy sample outputs
 	$(E) "  CP      demos/sample_plots"
 	$(Q)mkdir -p $(REALPREFIX)/demos/sample_plots
-	$(Q)cp demos/sample_plots/* $(REALPREFIX)/demos/sample_plots
+	$(Q)cp demos/sample_plots/*.* $(REALPREFIX)/demos/sample_plots
 # copy scripts
 	$(E) "  CP      scripts"
 	$(Q)mkdir -p $(REALPREFIX)/scripts
