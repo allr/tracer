@@ -133,7 +133,7 @@ SELECT
   "startup" as label,
   startup_self as self,
   startup_total as total,
-  startup_starts as starts,
+  startup_calls as calls,
   startup_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -142,7 +142,7 @@ UNION ALL SELECT
   "userfuncfallback" as label,
   userfuncfallback_self as self,
   userfuncfallback_total as total,
-  userfuncfallback_starts as starts,
+  userfuncfallback_calls as calls,
   userfuncfallback_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -151,7 +151,7 @@ UNION ALL SELECT
   "cons" as label,
   cons_self as self,
   cons_total as total,
-  cons_starts as starts,
+  cons_calls as calls,
   cons_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -160,7 +160,7 @@ UNION ALL SELECT
   "allocvector" as label,
   allocvector_self as self,
   allocvector_total as total,
-  allocvector_starts as starts,
+  allocvector_calls as calls,
   allocvector_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -169,7 +169,7 @@ UNION ALL SELECT
   "alloclist" as label,
   alloclist_self as self,
   alloclist_total as total,
-  alloclist_starts as starts,
+  alloclist_calls as calls,
   alloclist_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -178,7 +178,7 @@ UNION ALL SELECT
   "allocs4" as label,
   allocs4_self as self,
   allocs4_total as total,
-  allocs4_starts as starts,
+  allocs4_calls as calls,
   allocs4_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -187,7 +187,7 @@ UNION ALL SELECT
   "gcinternal" as label,
   gcinternal_self as self,
   gcinternal_total as total,
-  gcinternal_starts as starts,
+  gcinternal_calls as calls,
   gcinternal_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -196,7 +196,7 @@ UNION ALL SELECT
   "doarith" as label,
   doarith_self as self,
   doarith_total as total,
-  doarith_starts as starts,
+  doarith_calls as calls,
   doarith_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -205,7 +205,7 @@ UNION ALL SELECT
   "domatprod" as label,
   domatprod_self as self,
   domatprod_total as total,
-  domatprod_starts as starts,
+  domatprod_calls as calls,
   domatprod_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -214,7 +214,7 @@ UNION ALL SELECT
   "gzfile" as label,
   gzfile_self as self,
   gzfile_total as total,
-  gzfile_starts as starts,
+  gzfile_calls as calls,
   gzfile_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -223,7 +223,7 @@ UNION ALL SELECT
   "bzfile" as label,
   bzfile_self as self,
   bzfile_total as total,
-  bzfile_starts as starts,
+  bzfile_calls as calls,
   bzfile_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -232,7 +232,7 @@ UNION ALL SELECT
   "xzfile" as label,
   xzfile_self as self,
   xzfile_total as total,
-  xzfile_starts as starts,
+  xzfile_calls as calls,
   xzfile_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -241,7 +241,7 @@ UNION ALL SELECT
   "onexits" as label,
   onexits_self as self,
   onexits_total as total,
-  onexits_starts as starts,
+  onexits_calls as calls,
   onexits_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -250,7 +250,7 @@ UNION ALL SELECT
   "dotexternalfull" as label,
   dotexternalfull_self as self,
   dotexternalfull_total as total,
-  dotexternalfull_starts as starts,
+  dotexternalfull_calls as calls,
   dotexternalfull_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -259,7 +259,7 @@ UNION ALL SELECT
   "dotexternal" as label,
   dotexternal_self as self,
   dotexternal_total as total,
-  dotexternal_starts as starts,
+  dotexternal_calls as calls,
   dotexternal_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -268,7 +268,7 @@ UNION ALL SELECT
   "dotcallfull" as label,
   dotcallfull_self as self,
   dotcallfull_total as total,
-  dotcallfull_starts as starts,
+  dotcallfull_calls as calls,
   dotcallfull_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -277,7 +277,7 @@ UNION ALL SELECT
   "dotcall" as label,
   dotcall_self as self,
   dotcall_total as total,
-  dotcall_starts as starts,
+  dotcall_calls as calls,
   dotcall_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -286,7 +286,7 @@ UNION ALL SELECT
   "dotcfull" as label,
   dotcfull_self as self,
   dotcfull_total as total,
-  dotcfull_starts as starts,
+  dotcfull_calls as calls,
   dotcfull_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -295,7 +295,7 @@ UNION ALL SELECT
   "dotc" as label,
   dotc_self as self,
   dotc_total as total,
-  dotc_starts as starts,
+  dotc_calls as calls,
   dotc_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -304,7 +304,7 @@ UNION ALL SELECT
   "dotfortranfull" as label,
   dotfortranfull_self as self,
   dotfortranfull_total as total,
-  dotfortranfull_starts as starts,
+  dotfortranfull_calls as calls,
   dotfortranfull_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -313,7 +313,7 @@ UNION ALL SELECT
   "dotfortran" as label,
   dotfortran_self as self,
   dotfortran_total as total,
-  dotfortran_starts as starts,
+  dotfortran_calls as calls,
   dotfortran_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -322,7 +322,7 @@ UNION ALL SELECT
   "dounzip" as label,
   dounzip_self as self,
   dounzip_total as total,
-  dounzip_starts as starts,
+  dounzip_calls as calls,
   dounzip_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -331,7 +331,7 @@ UNION ALL SELECT
   "zipread" as label,
   zipread_self as self,
   zipread_total as total,
-  zipread_starts as starts,
+  zipread_calls as calls,
   zipread_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -340,7 +340,7 @@ UNION ALL SELECT
   "duplicate" as label,
   duplicate_self as self,
   duplicate_total as total,
-  duplicate_starts as starts,
+  duplicate_calls as calls,
   duplicate_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -349,7 +349,7 @@ UNION ALL SELECT
   "findvarinframe3other" as label,
   findvarinframe3other_self as self,
   findvarinframe3other_total as total,
-  findvarinframe3other_starts as starts,
+  findvarinframe3other_calls as calls,
   findvarinframe3other_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -358,7 +358,7 @@ UNION ALL SELECT
   "symlookup" as label,
   symlookup_self as self,
   symlookup_total as total,
-  symlookup_starts as starts,
+  symlookup_calls as calls,
   symlookup_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -367,7 +367,7 @@ UNION ALL SELECT
   "symlookupeval" as label,
   symlookupeval_self as self,
   symlookupeval_total as total,
-  symlookupeval_starts as starts,
+  symlookupeval_calls as calls,
   symlookupeval_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -376,7 +376,7 @@ UNION ALL SELECT
   "funlookup" as label,
   funlookup_self as self,
   funlookup_total as total,
-  funlookup_starts as starts,
+  funlookup_calls as calls,
   funlookup_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -385,7 +385,7 @@ UNION ALL SELECT
   "funlookupeval" as label,
   funlookupeval_self as self,
   funlookupeval_total as total,
-  funlookupeval_starts as starts,
+  funlookupeval_calls as calls,
   funlookupeval_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -394,7 +394,7 @@ UNION ALL SELECT
   "match" as label,
   match_self as self,
   match_total as total,
-  match_starts as starts,
+  match_calls as calls,
   match_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -403,7 +403,7 @@ UNION ALL SELECT
   "evallist" as label,
   evallist_self as self,
   evallist_total as total,
-  evallist_starts as starts,
+  evallist_calls as calls,
   evallist_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -412,7 +412,7 @@ UNION ALL SELECT
   "download" as label,
   download_self as self,
   download_total as total,
-  download_starts as starts,
+  download_calls as calls,
   download_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -421,7 +421,7 @@ UNION ALL SELECT
   "dologic" as label,
   dologic_self as self,
   dologic_total as total,
-  dologic_starts as starts,
+  dologic_calls as calls,
   dologic_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -430,7 +430,7 @@ UNION ALL SELECT
   "dologic2" as label,
   dologic2_self as self,
   dologic2_total as total,
-  dologic2_starts as starts,
+  dologic2_calls as calls,
   dologic2_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -439,7 +439,7 @@ UNION ALL SELECT
   "dologic3" as label,
   dologic3_self as self,
   dologic3_total as total,
-  dologic3_starts as starts,
+  dologic3_calls as calls,
   dologic3_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -448,7 +448,7 @@ UNION ALL SELECT
   "repl" as label,
   repl_self as self,
   repl_total as total,
-  repl_starts as starts,
+  repl_calls as calls,
   repl_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -457,7 +457,7 @@ UNION ALL SELECT
   "setupmainloop" as label,
   setupmainloop_self as self,
   setupmainloop_total as total,
-  setupmainloop_starts as starts,
+  setupmainloop_calls as calls,
   setupmainloop_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -466,7 +466,7 @@ UNION ALL SELECT
   "endmainloop" as label,
   endmainloop_self as self,
   endmainloop_total as total,
-  endmainloop_starts as starts,
+  endmainloop_calls as calls,
   endmainloop_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -475,7 +475,7 @@ UNION ALL SELECT
   "install" as label,
   install_self as self,
   install_total as total,
-  install_starts as starts,
+  install_calls as calls,
   install_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -484,7 +484,7 @@ UNION ALL SELECT
   "dotspecial2" as label,
   dotspecial2_self as self,
   dotspecial2_total as total,
-  dotspecial2_starts as starts,
+  dotspecial2_calls as calls,
   dotspecial2_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -493,7 +493,7 @@ UNION ALL SELECT
   "dorelop" as label,
   dorelop_self as self,
   dorelop_total as total,
-  dorelop_starts as starts,
+  dorelop_calls as calls,
   dorelop_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -502,7 +502,7 @@ UNION ALL SELECT
   "dosubset" as label,
   dosubset_self as self,
   dosubset_total as total,
-  dosubset_starts as starts,
+  dosubset_calls as calls,
   dosubset_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -511,7 +511,7 @@ UNION ALL SELECT
   "dosubset2" as label,
   dosubset2_self as self,
   dosubset2_total as total,
-  dosubset2_starts as starts,
+  dosubset2_calls as calls,
   dosubset2_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -520,7 +520,7 @@ UNION ALL SELECT
   "dosubset3" as label,
   dosubset3_self as self,
   dosubset3_total as total,
-  dosubset3_starts as starts,
+  dosubset3_calls as calls,
   dosubset3_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -529,7 +529,7 @@ UNION ALL SELECT
   "rsock" as label,
   rsock_self as self,
   rsock_total as total,
-  rsock_starts as starts,
+  rsock_calls as calls,
   rsock_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -538,7 +538,7 @@ UNION ALL SELECT
   "sleep" as label,
   sleep_self as self,
   sleep_total as total,
-  sleep_starts as starts,
+  sleep_calls as calls,
   sleep_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
@@ -547,7 +547,7 @@ UNION ALL SELECT
   "system" as label,
   system_self as self,
   system_total as total,
-  system_starts as starts,
+  system_calls as calls,
   system_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 

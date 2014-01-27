@@ -16,7 +16,7 @@ public class TimeSummary extends Summary {
         // wrapper class to generate a default parameter
         public static class TimeTMI extends TraceMultiInfo {
                 public TimeTMI(String name) {
-                        super(name, new String[]{"self", "total", "starts", "aborts"});
+                        super(name, new String[]{"self", "total", "calls", "aborts"});
                 }
         }
 
