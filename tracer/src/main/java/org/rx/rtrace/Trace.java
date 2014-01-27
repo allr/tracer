@@ -80,7 +80,7 @@ public class Trace extends TraceInfo {
 	}
 	
 	public File getRTimedOutputFile() {
-		return new File(getOutputDir(), getName() + ".time");
+		return new File(getOutputDir(), getName() + ".rawtime");
 	}
 	
 	public boolean isStarted() {

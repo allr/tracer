@@ -21,7 +21,7 @@ public class TimeSummary extends Summary {
         }
 
         // FIXME: Rotate table by 90 degrees, throw this array away and
-        //        create the names dynamically from the .time file
+        //        create the names dynamically from the .rawtime file
 	static final TraceInfo fields[] = {
 		new TraceInfo("TraceDate", "text"),
 		new TraceInfo("Workdir", "text"),
@@ -147,7 +147,7 @@ public class TimeSummary extends Summary {
 	}
 	
 	void register_time_summary(Connection database, File file) throws IOException, SQLException{
-		String vignette_name = file.getName().replace(".time", "");
+		String vignette_name = file.getName().replace(".rawtime", "");
 		int vignette_id = DataBase.register_vignette(database, vignette_name);
 		register_summary(database, file, vignette_id);
 		if(Option.Verbose.verbose)
@@ -172,7 +172,7 @@ public class TimeSummary extends Summary {
 					for(File file_indir: file.listFiles(new FilenameFilter() {
 						@Override
 						public boolean accept(File dir, String name) {
-							return name.endsWith(".time");
+							return name.endsWith(".rawtime");
 						}
 					}))
 						ts.register_time_summary(database, file_indir);
