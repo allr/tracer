@@ -86,6 +86,7 @@ public class TimeSummary extends Summary {
                 // envir.c
                 new TimeTMI("findVarInFrame3other"),
 		new TimeTMI("SymLookup"),
+		new TimeTMI("SymLookupEval"),
 		new TimeTMI("FunLookup"),
 		new TimeTMI("FunLookupEval"),
 
@@ -99,6 +100,7 @@ public class TimeSummary extends Summary {
                 // logic.c
 		new TimeTMI("doLogic"),
                 new TimeTMI("doLogic2"),
+                new TimeTMI("doLogic3"),
 
                 // main.c
 		new TimeTMI("Repl"),
@@ -118,10 +120,7 @@ public class TimeSummary extends Summary {
 		new TimeTMI("doSubset3"),
 
                 // rsock.c
-		new TimeTMI("inSockRead"),
-		new TimeTMI("inSockWrite"),
-		new TimeTMI("inSockOpen"),
-		new TimeTMI("inSockConnect"),
+		new TimeTMI("Rsock"),
 
                 // sys-std.c
 		new TimeTMI("Sleep"),

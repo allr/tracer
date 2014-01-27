@@ -156,7 +156,7 @@ CREATE VIEW runtime_details_pct AS
       CAST(TotalRuntime AS REAL), 4) AS Subset,
     ROUND(100 * EvalList_self / CAST(TotalRuntime AS REAL), 4) AS EvalList,
     ROUND(100 * (doarith_self + domatprod_self + dologic_self +
-      dologic2_self + dorelop_self ) / CAST(TotalRuntime AS REAL), 4)
+      dologic2_self + dologic3_self + dorelop_self ) / CAST(TotalRuntime AS REAL), 4)
       AS Arith,
     ROUND(100 * (builtinsum_self + specialsum_self + dotSpecial2_self) /
       CAST(TotalRuntime AS REAL), 4) AS BuiltIn_Special,
@@ -182,7 +182,7 @@ CREATE VIEW runtime_details_pct AS
       CAST(SUM(TotalRuntime) AS REAL), 4) AS Subset,
     ROUND(100 * SUM(EvalList_self) / CAST(SUM(TotalRuntime) AS REAL), 4) AS EvalList,
     ROUND(100 * (SUM(doarith_self) + SUM(domatprod_self) + SUM(dologic_self) +
-      SUM(dologic2_self) + SUM(dorelop_self)) / CAST(SUM(TotalRuntime) AS REAL), 4)
+      SUM(dologic2_self) + SUM(dologic3_self) + SUM(dorelop_self)) / CAST(SUM(TotalRuntime) AS REAL), 4)
       AS Arith,
     ROUND(100 * (SUM(builtinsum_self) + SUM(specialsum_self) + SUM(dotSpecial2_self)) /
       CAST(SUM(TotalRuntime) AS REAL), 4) AS BuiltIn_Special,

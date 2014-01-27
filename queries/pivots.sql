@@ -364,6 +364,15 @@ FROM time_summary left join tasks on tasks.id=time_summary.id
 
 UNION ALL SELECT
   time_summary.id as summary_id, name as name,
+  "symlookupeval" as label,
+  symlookupeval_self as self,
+  symlookupeval_total as total,
+  symlookupeval_starts as starts,
+  symlookupeval_aborts as aborts
+FROM time_summary left join tasks on tasks.id=time_summary.id
+
+UNION ALL SELECT
+  time_summary.id as summary_id, name as name,
   "funlookup" as label,
   funlookup_self as self,
   funlookup_total as total,
@@ -423,6 +432,15 @@ UNION ALL SELECT
   dologic2_total as total,
   dologic2_starts as starts,
   dologic2_aborts as aborts
+FROM time_summary left join tasks on tasks.id=time_summary.id
+
+UNION ALL SELECT
+  time_summary.id as summary_id, name as name,
+  "dologic3" as label,
+  dologic3_self as self,
+  dologic3_total as total,
+  dologic3_starts as starts,
+  dologic3_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
 UNION ALL SELECT
@@ -508,38 +526,11 @@ FROM time_summary left join tasks on tasks.id=time_summary.id
 
 UNION ALL SELECT
   time_summary.id as summary_id, name as name,
-  "insockread" as label,
-  insockread_self as self,
-  insockread_total as total,
-  insockread_starts as starts,
-  insockread_aborts as aborts
-FROM time_summary left join tasks on tasks.id=time_summary.id
-
-UNION ALL SELECT
-  time_summary.id as summary_id, name as name,
-  "insockwrite" as label,
-  insockwrite_self as self,
-  insockwrite_total as total,
-  insockwrite_starts as starts,
-  insockwrite_aborts as aborts
-FROM time_summary left join tasks on tasks.id=time_summary.id
-
-UNION ALL SELECT
-  time_summary.id as summary_id, name as name,
-  "insockopen" as label,
-  insockopen_self as self,
-  insockopen_total as total,
-  insockopen_starts as starts,
-  insockopen_aborts as aborts
-FROM time_summary left join tasks on tasks.id=time_summary.id
-
-UNION ALL SELECT
-  time_summary.id as summary_id, name as name,
-  "insockconnect" as label,
-  insockconnect_self as self,
-  insockconnect_total as total,
-  insockconnect_starts as starts,
-  insockconnect_aborts as aborts
+  "rsock" as label,
+  rsock_self as self,
+  rsock_total as total,
+  rsock_starts as starts,
+  rsock_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
 UNION ALL SELECT
