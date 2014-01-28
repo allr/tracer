@@ -154,7 +154,8 @@ CREATE VIEW runtime_details_pct AS
       CAST(TotalRuntime AS REAL), 4) AS MemAlloc,
     ROUND(100 * (dosubset_self + dosubset2_self + dosubset3_self) /
       CAST(TotalRuntime AS REAL), 4) AS Subset,
-    ROUND(100 * EvalList_self / CAST(TotalRuntime AS REAL), 4) AS EvalList,
+    ROUND(100 * (EvalList_self + FunLookupEval_self + SymLookupEval_self) /
+      CAST(TotalRuntime AS REAL), 4) AS EvalList,
     ROUND(100 * (doarith_self + domatprod_self + dologic_self +
       dologic2_self + dologic3_self + dorelop_self ) / CAST(TotalRuntime AS REAL), 4)
       AS Arith,
@@ -180,7 +181,8 @@ CREATE VIEW runtime_details_pct AS
       CAST(SUM(TotalRuntime) AS REAL), 4) AS MemAlloc,
     ROUND(100 * (SUM(dosubset_self) + SUM(dosubset2_self) + SUM(dosubset3_self)) /
       CAST(SUM(TotalRuntime) AS REAL), 4) AS Subset,
-    ROUND(100 * SUM(EvalList_self) / CAST(SUM(TotalRuntime) AS REAL), 4) AS EvalList,
+    ROUND(100 * SUM(EvalList_self + FunLookupEval_self + SymLookupEval_self) /
+      CAST(SUM(TotalRuntime) AS REAL), 4) AS EvalList,
     ROUND(100 * (SUM(doarith_self) + SUM(domatprod_self) + SUM(dologic_self) +
       SUM(dologic2_self) + SUM(dologic3_self) + SUM(dorelop_self)) / CAST(SUM(TotalRuntime) AS REAL), 4)
       AS Arith,
