@@ -109,7 +109,7 @@ public class TimeSummary extends Summary {
 
                 // names.c
 		new TimeTMI("Install"),
-		new TimeTMI("dotSpecial2"),
+		new TimeTMI("do_internal"),
 
                 // relop.c
                 new TimeTMI("doRelop"),

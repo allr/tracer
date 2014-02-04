@@ -481,11 +481,11 @@ FROM time_summary left join tasks on tasks.id=time_summary.id
 
 UNION ALL SELECT
   time_summary.id as summary_id, name as name,
-  "dotspecial2" as label,
-  dotspecial2_self as self,
-  dotspecial2_total as total,
-  dotspecial2_calls as calls,
-  dotspecial2_aborts as aborts
+  "do_internal" as label,
+  do_internal_self as self,
+  do_internal_total as total,
+  do_internal_calls as calls,
+  do_internal_aborts as aborts
 FROM time_summary left join tasks on tasks.id=time_summary.id
 
 UNION ALL SELECT

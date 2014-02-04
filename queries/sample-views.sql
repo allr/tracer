@@ -159,7 +159,7 @@ CREATE VIEW runtime_details_pct AS
     ROUND(100 * (doarith_self + domatprod_self + dologic_self +
       dologic2_self + dologic3_self + dorelop_self ) / CAST(TotalRuntime AS REAL), 4)
       AS Arith,
-    ROUND(100 * (builtinsum_self + specialsum_self + dotSpecial2_self) /
+    ROUND(100 * (builtinsum_self + specialsum_self + do_internal_self) /
       CAST(TotalRuntime AS REAL), 4) AS BuiltIn_Special,
     ROUND(100 * (startup_self + install_self + repl_self + userfunctionsum_self +
       setupMainLoop_self + endMainLoop_self + gzFile_self) / CAST(TotalRuntime AS REAL), 4)
@@ -186,7 +186,7 @@ CREATE VIEW runtime_details_pct AS
     ROUND(100 * (SUM(doarith_self) + SUM(domatprod_self) + SUM(dologic_self) +
       SUM(dologic2_self) + SUM(dologic3_self) + SUM(dorelop_self)) / CAST(SUM(TotalRuntime) AS REAL), 4)
       AS Arith,
-    ROUND(100 * (SUM(builtinsum_self) + SUM(specialsum_self) + SUM(dotSpecial2_self)) /
+    ROUND(100 * (SUM(builtinsum_self) + SUM(specialsum_self) + SUM(do_internal_self)) /
       CAST(SUM(TotalRuntime) AS REAL), 4) AS BuiltIn_Special,
     ROUND(100 * (SUM(startup_self) + SUM(install_self) + SUM(repl_self) + SUM(userfunctionsum_self) +
       SUM(setupMainLoop_self) + SUM(endMainLoop_self) + SUM(gzFile_self)) / CAST(SUM(TotalRuntime) AS REAL), 4)
