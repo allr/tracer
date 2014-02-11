@@ -1,6 +1,0 @@
-#!/bin/sh
-
-val=$?
-xpra stop $DISPLAY
-
-exit $val

@@ -1,6 +1,0 @@
-#!/bin/sh
-source /opt/r/tracer/env.sh
-
-output=$1
-shift
-/usr/bin/time -o $output -a -f '%Uuser %Ssystem %Eelapsed %PCPU %C' "$SCRIPTDIR/java_exec" $*

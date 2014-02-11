@@ -9,15 +9,11 @@ endif
 
 TRACER_JAR=tracer-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 
-# default target builds traceR
+# default target does nothing =)
 all:
-	$(E) "  MVN     clean install"
-	$(Q)mvn clean install -Dproject.build.sourceEncoding=UTF-8
-	$(E) "  CP      $(TRACER_JAR)"
-	$(Q)cp tracer/target/$(TRACER_JAR) tracer.jar
+	@echo "No compilation required =)"
 
 clean:
-	mvn clean -Dproject.build.sourceEncoding=UTF-8
 
 # allow install only if PREFIX is set
 ifdef PREFIX
@@ -27,13 +23,24 @@ else
 install: error
 endif
 
-real-install: all
+real-install:
 # create the target directory
 	$(E) "  MKDIR   $(PREFIX)"
 	$(Q)mkdir -p $(REALPREFIX)
-# copy jar
-	$(E) "  CP      tracer.jar"
-	$(Q)cp tracer.jar $(REALPREFIX)/tracer.jar
+# copy script
+	$(E) "  CP      tracer.pl"
+	$(Q)cp tracer.pl $(REALPREFIX)/tracer.pl
+	$(Q)chmod +x $(REALPREFIX)/tracer.pl
+# copy default config file (if not already there)
+	$(E) "  CP      tracer.conf"
+	$(Q)if [ ! -e $(REALPREFIX)/tracer.conf ]; then \
+	      cp tracer.conf $(REALPREFIX)/tracer.conf; \
+	    fi
+# create symlink for backwards compatibility
+	$(E) "  LN      tracer.sh"
+	$(Q)ln -sf $(REALPREFIX)/tracer.pl $(REALPREFIX)/tracer.sh
+# remove old version of traceR
+	$(Q)rm -f $(REALPREFIX)/tracer.jar
 # copy sample queries (and remove the old ones)
 	$(E) "  CP      queries"
 	$(Q)mkdir -p $(REALPREFIX)/queries
@@ -42,6 +49,7 @@ real-install: all
 	$(Q)rm -f $(REALPREFIX)/queries/020_analyses.sql
 	$(Q)rm -f $(REALPREFIX)/queries/tutorial_queries.sql
 	$(Q)rm -f $(REALPREFIX)/queries/z_final.sql
+	$(Q)rm -f $(REALPREFIX)/queries/pivots.sql
 	$(Q)cp queries/* $(REALPREFIX)/queries
 # copy sample programs
 	$(E) "  CP      demos"
@@ -55,15 +63,12 @@ real-install: all
 	$(E) "  CP      scripts"
 	$(Q)mkdir -p $(REALPREFIX)/scripts
 	$(Q)cp scripts/* $(REALPREFIX)/scripts
-	$(Q)cp tracer.sh $(REALPREFIX)/tracer.sh
 # fix install path in shell scripts
 	$(E) "  FIXPATH"
-	$(Q)./fixpath.sh $(REALPREFIX)/tracer.sh $(REALPREFIX)
 	$(Q)./fixpath.sh $(REALPREFIX)/demos/rundemos.sh $(REALPREFIX)
 	$(Q)./fixpath.sh $(REALPREFIX)/scripts/plotall.sh $(REALPREFIX)
 # fix permissions for non-fixpath scripts
 	$(Q)chmod +x $(REALPREFIX)/scripts/plotcsv.pl
-
 
 # error message if no PREFIX is specified
 error:
@@ -71,8 +76,8 @@ error:
 	@echo ""
 	@echo Please use \"$(MAKE) install PREFIX=/where/you/want/it/installed\"
 	@echo to specify a target directory.
-	@echo ""
-	@echo You can also use \"make help\" to see a list of
-	@echo variables available.
+#	@echo ""
+#	@echo You can also use \"make help\" to see a list of
+#	@echo variables available.
 
 .PHONY : all clean install real-install error

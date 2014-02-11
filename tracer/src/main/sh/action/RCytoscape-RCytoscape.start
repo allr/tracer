@@ -1,3 +1,0 @@
-#!/bin/sh
-~/Cytoscape_v2.8.1/cytoscape.sh&
-sleep 10

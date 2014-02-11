@@ -34,5 +34,5 @@ calcMandel <- function() {
 
 # plot the image
 image <- calcMandel()
-quant(image)
+invisible(quant(image))
 

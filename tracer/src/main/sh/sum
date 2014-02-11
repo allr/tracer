@@ -1,4 +1,0 @@
-#!/bin/sh
-[ -z "$C" ] && C=1
-
-gawk "{ s += \$$C} END {print s;}" $*

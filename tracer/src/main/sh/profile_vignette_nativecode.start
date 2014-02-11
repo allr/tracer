@@ -1,7 +1,0 @@
-#!/bin/sh
-
-cp /opt/r/bioc-2.7/RCurl/libs/RCurl.so.time /opt/r/bioc-2.7/RCurl/libs/RCurl.so
-chgrp r /opt/r/bioc-2.7/RCurl/libs/RCurl.so
-DISPLAY=:9
-xpra start $DISPLAY
-export DISPLAY     

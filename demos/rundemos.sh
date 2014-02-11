@@ -14,7 +14,9 @@ if [ -d traces ]; then
 fi
 
 for scr in $BASEDIR/demos/*.R; do
-    $BASEDIR/tracer.sh $scr
+    $BASEDIR/tracer.pl $scr
 done
+
+$BASEDIR/tracer.pl --autopivot --sqldir $BASEDIR/queries
 
 $BASEDIR/scripts/plotall.sh
