@@ -375,8 +375,13 @@ sub read_datafile {
             } else {
                 # data is a normal data line
                 if (exists($data{$words[0]})) {
-                    say STDERR "WARNING: Ignoring duplicate entry $words[0] in $filename line $.";
-                    next;
+                    if ($words[0] =~ /^<\.Internal>:La_rs/) {
+                        # workaround for two duplicate entries in names.c
+                        $words[0] .= "!5";
+                    } else {
+                        say STDERR "WARNING: Ignoring duplicate entry $words[0] in $filename line $.";
+                        next;
+                    }
                 }
 
                 push @dataorder, $words[0];
