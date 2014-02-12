@@ -518,7 +518,7 @@ if (scalar(keys %config_values) != 0) {
 $TraceBase = rel2abs($TraceBase) unless file_name_is_absolute($TraceBase);
 $DBFile    = rel2abs($DBFile)    unless file_name_is_absolute($DBFile);
 # use relative to this script unless the directory is already accessible
-$sqldir    = catfile($Bin, $sqldir) unless -d $sqldir;
+$sqldir    = catfile($Bin, $sqldir) unless defined($sqldir) && -d $sqldir;
 
 # parse the command line options
 my $scriptname;
