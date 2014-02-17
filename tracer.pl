@@ -540,7 +540,8 @@ GetOptions(
     "skip-sql"            => \$skip_sql,
     ) or pod2usage(1);
 
-pod2usage(0) if $show_help || (scalar(@ARGV) == 0 && !$do_autopivot);
+pod2usage(0) if $show_help || (scalar(@ARGV) == 0 && !$do_autopivot &&
+                               !(defined($sqldir) && !$skip_sql));
 
 if (scalar(@ARGV) != 0) {
     $scriptname  = shift @ARGV;
