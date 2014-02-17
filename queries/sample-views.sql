@@ -140,50 +140,162 @@ DROP VIEW IF EXISTS runtime_details_pct;
 CREATE VIEW runtime_details_pct AS
   SELECT
     name,
-    ROUND(100 * (dotC_self + dotFortran_self + dotCall_self +
-      dotExternal_self ) / CAST(TotalRuntime AS REAL), 4) AS External,
-    ROUND(100 * (FunLookup_self + SymLookup_self +
-      FindVarInFrame3other_self ) / CAST(TotalRuntime AS REAL), 4) AS Lookup,
-    ROUND(100 * Match_self / CAST(TotalRuntime AS REAL), 4) AS Match,
-    ROUND(100 * Duplicate_self / CAST(TotalRuntime AS REAL), 4) AS Duplicate,
-    ROUND(100 * gcinternal_self / CAST(TotalRuntime AS REAL), 4) AS GC,
-    ROUND(100 * (cons_self + allocList_self + allocVector_self ) /
-      CAST(TotalRuntime AS REAL), 4) AS MemAlloc,
-    ROUND(100 * (dosubset_self + dosubset2_self + dosubset3_self) /
-      CAST(TotalRuntime AS REAL), 4) AS Subset,
-    ROUND(100 * (EvalList_self + bcEval_self) / CAST(TotalRuntime AS REAL), 4) AS EvalList,
-    ROUND(100 * (doarith_self + domatprod_self + dologic_self +
-      dologic2_self + dorelop_self + bcEvalArith1_self + bcEvalArith2_self) /
-      CAST(TotalRuntime AS REAL), 4) AS Arith,
-    ROUND(100 * (builtinsum_self + specialsum_self + do_internal_self) /
-      CAST(TotalRuntime AS REAL), 4) AS BuiltIn_Special,
-    ROUND(100 * (startup_self + install_self + repl_self + userfunctionsum_self +
-      setupMainLoop_self + endMainLoop_self + gzFile_self) / CAST(TotalRuntime AS REAL), 4)
-      AS Other
+    ROUND(100 * (
+      dotC_self            +
+      dotCFull_self        +
+      dotFortran_self      +
+      dotFortranFull_self  +
+      dotCall_self         +
+      dotCallFull_self     +
+      dotExternal_self     +
+      dotExternalFull_self
+    ) / CAST(TotalRuntime AS REAL), 4) AS External,
+    ROUND(100 * (
+      FunLookup_self +
+      SymLookup_self +
+      FindVarInFrame3other_self
+    ) / CAST(TotalRuntime AS REAL), 4) AS Lookup,
+    ROUND(100 * (
+      Match_self
+    ) / CAST(TotalRuntime AS REAL), 4) AS Match,
+    ROUND(100 * (
+      Duplicate_self
+    ) / CAST(TotalRuntime AS REAL), 4) AS Duplicate,
+    ROUND(100 * (
+      GCInternal_self
+    ) / CAST(TotalRuntime AS REAL), 4) AS GC,
+    ROUND(100 * (
+      cons_self        +
+      allocList_self   +
+      allocS4_self     +
+      allocVector_self
+    ) / CAST(TotalRuntime AS REAL), 4) AS MemAlloc,
+    ROUND(100 * (
+      doSubset_self  +
+      doSubset2_self +
+      doSubset3_self
+    ) / CAST(TotalRuntime AS REAL), 4) AS Subset,
+    ROUND(100 * (
+      EvalList_self +
+      bcEval_self  -- FIXME?
+    ) / CAST(TotalRuntime AS REAL), 4) AS EvalList,
+    ROUND(100 * (
+      doArith_self      +
+      doMatprod_self    +
+      doLogic_self      +
+      doLogic2_self     +
+      doLogic3_self     +
+      doRelop_self      +
+      bcEvalArith1_self +
+      bcEvalArith2_self +
+      bcEvalMath1_self  +
+      bcEvalRelop_self  +
+      bcEvalLogic_self
+    ) / CAST(TotalRuntime AS REAL), 4) AS Arith,
+    ROUND(100 * (
+      BuiltinSum_self  +
+      SpecialSum_self  +
+      do_internal_self
+    ) / CAST(TotalRuntime AS REAL), 4) AS BuiltIn_Special,
+    ROUND(100 * (
+      Startup_self          +
+      Install_self          +
+      Repl_self             +
+      UserFunctionSum_self  +
+      UserFuncFallback_self +
+      setupMainLoop_self    +
+      endMainLoop_self      +
+      onExits_self          +
+      gzFile_self           +
+      bzFile_self           +
+      xzFile_self           +
+      doUnzip_self          +
+      zipRead_self          +
+      Download_self         +
+      Rsock_self            +
+      Sleep_self            +
+      System_self
+    ) / CAST(TotalRuntime AS REAL), 4) AS Other
   FROM TimingResults_pivot
 
   UNION ALL SELECT
     " Average",
-    ROUND(100 * (SUM(dotC_self) + SUM(dotFortran_self) + SUM(dotCall_self) +
-      SUM(dotExternal_self) ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS External,
-    ROUND(100 * ( SUM(FunLookup_self) + SUM(SymLookup_self) +
-      SUM(FindVarInFrame3other_self) ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Lookup,
-    ROUND(100 * SUM(Match_self) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Match,
-    ROUND(100 * SUM(Duplicate_self) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Duplicate,
-    ROUND(100 * SUM(gcinternal_self) / CAST(SUM(TotalRuntime) AS REAL), 4) AS GC,
-    ROUND(100 * (SUM(cons_self) + SUM(allocList_self) + SUM(allocVector_self) ) /
-      CAST(SUM(TotalRuntime) AS REAL), 4) AS MemAlloc,
-    ROUND(100 * (SUM(dosubset_self) + SUM(dosubset2_self) + SUM(dosubset3_self)) /
-      CAST(SUM(TotalRuntime) AS REAL), 4) AS Subset,
-    ROUND(100 * SUM(EvalList_self) + SUM(bcEval_self) / CAST(SUM(TotalRuntime) AS REAL), 4) AS EvalList,
-    ROUND(100 * (SUM(doarith_self) + SUM(domatprod_self) + SUM(dologic_self) +
-      SUM(dologic2_self) + SUM(dorelop_self) + SUM(bcEvalArith1_self) + SUM(bcEvalArith2_self)) /
-      CAST(SUM(TotalRuntime) AS REAL), 4) AS Arith,
-    ROUND(100 * (SUM(builtinsum_self) + SUM(specialsum_self) + SUM(do_internal_self)) /
-      CAST(SUM(TotalRuntime) AS REAL), 4) AS BuiltIn_Special,
-    ROUND(100 * (SUM(startup_self) + SUM(install_self) + SUM(repl_self) + SUM(userfunctionsum_self) +
-      SUM(setupMainLoop_self) + SUM(endMainLoop_self) + SUM(gzFile_self)) / CAST(SUM(TotalRuntime) AS REAL), 4)
-      AS Other
+    ROUND(100 * SUM(
+      dotC_self            +
+      dotCFull_self        +
+      dotFortran_self      +
+      dotFortranFull_self  +
+      dotCall_self         +
+      dotCallFull_self     +
+      dotExternal_self     +
+      dotExternalFull_self
+    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS External,
+    ROUND(100 * SUM(
+      FunLookup_self +
+      SymLookup_self +
+      FindVarInFrame3other_self
+    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Lookup,
+    ROUND(100 * SUM(
+      Match_self
+    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Match,
+    ROUND(100 * SUM(
+      Duplicate_self
+    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Duplicate,
+    ROUND(100 * SUM(
+      GCInternal_self
+    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS GC,
+    ROUND(100 * SUM(
+      cons_self        +
+      allocList_self   +
+      allocS4_self     +
+      allocVector_self
+    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS MemAlloc,
+    ROUND(100 * SUM(
+      doSubset_self  +
+      doSubset2_self +
+      doSubset3_self
+    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Subset,
+    ROUND(100 * SUM(
+      EvalList_self +
+      bcEval_self  -- FIXME?
+    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS EvalList,
+    ROUND(100 * SUM(
+      doArith_self      +
+      doMatprod_self    +
+      doLogic_self      +
+      doLogic2_self     +
+      doLogic3_self     +
+      doRelop_self      +
+      bcEvalArith1_self +
+      bcEvalArith2_self +
+      bcEvalMath1_self  +
+      bcEvalRelop_self  +
+      bcEvalLogic_self
+    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Arith,
+    ROUND(100 * SUM(
+      BuiltinSum_self  +
+      SpecialSum_self  +
+      do_internal_self
+    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS BuiltIn_Special,
+    ROUND(100 * SUM(
+      Startup_self          +
+      Install_self          +
+      Repl_self             +
+      UserFunctionSum_self  +
+      UserFuncFallback_self +
+      setupMainLoop_self    +
+      endMainLoop_self      +
+      onExits_self          +
+      gzFile_self           +
+      bzFile_self           +
+      xzFile_self           +
+      doUnzip_self          +
+      zipRead_self          +
+      Download_self         +
+      Rsock_self            +
+      Sleep_self            +
+      System_self
+    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Other
   FROM TimingResults_pivot
 order by name;
 
