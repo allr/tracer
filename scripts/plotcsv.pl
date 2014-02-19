@@ -53,6 +53,7 @@ my $plot_pdf     = 1;
 my $min_range    = undef;
 my $max_range    = undef;
 my $logy         = 0;
+my $ylabel       = undef;
 my $title        = undef;
 
 # parse options
@@ -64,6 +65,7 @@ GetOptions(
     "minrange=i" => \$min_range,
     "maxrange=i" => \$max_range,
     "logy!"      => \$logy,
+    "ylabel=s"   => \$ylabel,
     "title=s"    => \$title
     ) or pod2usage(2);
 
@@ -132,6 +134,10 @@ EOT
 
 if ($logy) {
   say PLOT "set logscale y";
+}
+
+if (defined($ylabel)) {
+  say PLOT "set ylabel \"$ylabel\"";
 }
 
 if (defined($title)) {
