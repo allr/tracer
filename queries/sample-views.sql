@@ -151,9 +151,10 @@ CREATE VIEW runtime_details_pct AS
       dotExternalFull_self
     ) / CAST(TotalRuntime AS REAL), 4) AS External,
     ROUND(100 * (
-      FunLookup_self +
-      SymLookup_self +
-      FindVarInFrame3other_self
+      FunLookup_self            +
+      SymLookup_self            +
+      FindVarInFrame3other_self +
+      bcEvalGetvar_self
     ) / CAST(TotalRuntime AS REAL), 4) AS Lookup,
     ROUND(100 * (
       Match_self
@@ -171,9 +172,12 @@ CREATE VIEW runtime_details_pct AS
       allocVector_self
     ) / CAST(TotalRuntime AS REAL), 4) AS MemAlloc,
     ROUND(100 * (
-      doSubset_self  +
-      doSubset2_self +
-      doSubset3_self
+      doSubset_self     +
+      doSubset2_self    +
+      doSubset3_self    +
+      doSubassign_self  +
+      doSubassign2_self +
+      doSubassign3_self
     ) / CAST(TotalRuntime AS REAL), 4) AS Subset,
     ROUND(100 * (
       EvalList_self +
