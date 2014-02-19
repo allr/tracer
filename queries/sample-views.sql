@@ -180,8 +180,7 @@ CREATE VIEW runtime_details_pct AS
       doSubassign3_self
     ) / CAST(TotalRuntime AS REAL), 4) AS Subset,
     ROUND(100 * (
-      EvalList_self +
-      bcEval_self  -- FIXME?
+      EvalList_self
     ) / CAST(TotalRuntime AS REAL), 4) AS EvalList,
     ROUND(100 * (
       doArith_self      +
@@ -202,6 +201,7 @@ CREATE VIEW runtime_details_pct AS
       do_internal_self
     ) / CAST(TotalRuntime AS REAL), 4) AS BuiltIn_Special,
     ROUND(100 * (
+      bcEval_self           + -- FIXME?
       Startup_self          +
       Install_self          +
       Repl_self             +
@@ -235,9 +235,10 @@ CREATE VIEW runtime_details_pct AS
       dotExternalFull_self
     ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS External,
     ROUND(100 * SUM(
-      FunLookup_self +
-      SymLookup_self +
-      FindVarInFrame3other_self
+      FunLookup_self            +
+      SymLookup_self            +
+      FindVarInFrame3other_self +
+      bcEvalGetvar_self
     ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Lookup,
     ROUND(100 * SUM(
       Match_self
@@ -255,13 +256,15 @@ CREATE VIEW runtime_details_pct AS
       allocVector_self
     ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS MemAlloc,
     ROUND(100 * SUM(
-      doSubset_self  +
-      doSubset2_self +
-      doSubset3_self
+      doSubset_self     +
+      doSubset2_self    +
+      doSubset3_self    +
+      doSubassign_self  +
+      doSubassign2_self +
+      doSubassign3_self
     ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Subset,
     ROUND(100 * SUM(
-      EvalList_self +
-      bcEval_self  -- FIXME?
+      EvalList_self
     ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS EvalList,
     ROUND(100 * SUM(
       doArith_self      +
@@ -282,6 +285,7 @@ CREATE VIEW runtime_details_pct AS
       do_internal_self
     ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS BuiltIn_Special,
     ROUND(100 * SUM(
+      bcEval_self           + -- FIXME?
       Startup_self          +
       Install_self          +
       Repl_self             +
