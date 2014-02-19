@@ -52,6 +52,8 @@ my $plot_stacked = 0;
 my $plot_pdf     = 1;
 my $min_range    = undef;
 my $max_range    = undef;
+my $logy         = 0;
+my $title        = undef;
 
 # parse options
 GetOptions(
@@ -60,7 +62,9 @@ GetOptions(
     "png"        => sub { $plot_pdf = 0; },
     "stacked"    => \$plot_stacked,
     "minrange=i" => \$min_range,
-    "maxrange=i" => \$max_range
+    "maxrange=i" => \$max_range,
+    "logy!"      => \$logy,
+    "title=s"    => \$title
     ) or pod2usage(2);
 
 $show_help = 1 if (scalar(@ARGV) != 2);
@@ -125,6 +129,14 @@ set style fill solid border -1
 set xtic rotate by -45 scale 0
 set boxwidth 0.9
 EOT
+
+if ($logy) {
+  say PLOT "set logscale y";
+}
+
+if (defined($title)) {
+  say PLOT "set title \"$title\"";
+}
 
 if ($plot_stacked) {
   say PLOT "set style histogram rowstacked";
@@ -215,6 +227,14 @@ set the minimum plot range (default auto)
 =item B<--maxrange val>
 
 set the maximum plot range (default auto)
+
+=item B<--logy>
+
+turn on logarithmic scaling for the Y axis
+
+=item B<--title text>
+
+add a title text to the plot
 
 =back
 
