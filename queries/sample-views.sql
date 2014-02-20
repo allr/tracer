@@ -445,3 +445,35 @@ CREATE VIEW total_runtimes AS
     SUM(totalruntime / 1e9) / cast(count(totalruntime) AS REAL)
     FROM TimingResults_pivot
   ORDER BY name;
+
+
+-- percentage of calls with n arguments
+DROP VIEW IF EXISTS argument_count_pct;
+CREATE VIEW argument_count_pct AS
+  SELECT
+    Traces.name AS name,
+    ArgumentCounts.count,
+    ROUND(100 * CAST(ArgumentCounts.calls AS REAL) / TotalCalls, 2) AS CallPercentage
+  FROM
+    ArgumentCounts JOIN Traces JOIN (
+      SELECT
+        trace_id,
+        SUM(calls) AS TotalCalls
+      FROM
+        ArgumentCounts GROUP BY trace_id
+    ) AS SumTable ON
+      ArgumentCounts.trace_id = Traces.id AND
+      SumTable.trace_id = ArgumentCounts.trace_id
+  UNION ALL SELECT
+    " Average",
+    ArgumentCounts.count,
+    ROUND(100 * CAST(SUM(ArgumentCounts.calls) AS REAL) / TotalCalls, 2)
+  FROM
+    ArgumentCounts JOIN (
+      SELECT
+        SUM(calls) AS TotalCalls
+      FROM
+        ArgumentCounts
+    ) AS SumTable
+  GROUP BY count
+  ORDER BY name;
