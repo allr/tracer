@@ -28,9 +28,12 @@ use DBI;
 use Data::Dumper;
 use File::Basename;
 use File::Spec::Functions qw(catfile rel2abs file_name_is_absolute);
+use FileHandle;
 use FindBin qw($Bin);
 use Getopt::Long qw(:config require_order);
+use IPC::Open3;
 use Pod::Usage;
+use POSIX ':sys_wait_h';
 
 use constant TracesTableVersion        => 1;
 use constant TimingResultsTableVersion => 1;
@@ -268,26 +271,56 @@ sub create_pivot {
 ### interface to R interpreters ###
 
 sub run_R {
+    my $datadir = shift;
     my $interp_base = shift;
     my @args = (
         catfile($interp_base,"bin/R"),
         "--vanilla", # FIXME: Configurable?
         "--slave",
         @_);
+    my $stdout     = FileHandle->new;
+    my $stdoutfile = FileHandle->new;
+
+    open $stdoutfile, ">", catfile($datadir, "output.txt") or die "Can't open output.txt: $!";
 
     say "Running ", join(" ", @args);
-    system(@args);
 
-    if ($? == -1) {
-        say STDERR "ERROR: Failed to execute $interp_base/bin/R: $!";
-        exit 2;
-    } elsif ($? & 127) {
-        say STDERR "ERROR: R interpreter was terminated by signal";
-        exit 2;
-    } elsif ($? >> 8) {
-        say STDERR "ERROR: R interpreter exited with status ", $? >> 8;
-        exit 2;
-    }
+    my $pid = open3("<&", $stdout, 0, @args);
+
+    do {
+        my ($rin, $rout, $nfound);
+
+        $rin = '';
+        vec($rin, fileno($stdout), 1) = 1;
+
+        $nfound = select($rout = $rin, undef, undef, undef);
+
+        if ($nfound < 0) {
+            say STDERR "Error while waiting for R interpreter:\n$!";
+            exit 2;
+        } elsif ($nfound > 0) {
+            if (vec($rout, fileno($stdout), 1)) {
+                my ($buf, $nbyte);
+
+                $nbyte = sysread($stdout, $buf, 1024);
+                if ($nbyte < 0) {
+                    # Error
+                    say STDERR "Error reading R interpreter output: $!";
+                    goto LOOPEND; # can't "last" in do {}
+                }
+                print $stdoutfile $buf;
+                print $buf;
+            }
+        } else {
+            say STDERR "Huh, select returned with nfound=0?";
+        }
+      LOOPEND:
+    } while (waitpid($pid, WNOHANG) == 0);
+
+    waitpid $pid, 0; # wait for termination
+
+    close $stdoutfile;
+    close $stdout;
 }
 
 sub run_timeR {
@@ -295,7 +328,7 @@ sub run_timeR {
     my $scriptname = shift;
     my @scriptargs = @_;
 
-    run_R($TimeRBase, "--timeR-raw=".catfile($tracedir, "script.time"),
+    run_R($tracedir, $TimeRBase, "--timeR-raw=".catfile($tracedir, "script.time"),
           "--timeR-verbose", "-f", $scriptname, "--args", @scriptargs);
 }
 
@@ -305,7 +338,7 @@ sub run_instrumented {
     my $scriptname = shift;
     my @scriptargs = @_;
 
-    run_R($RInstrBase, "--tracedir", $tracedir,
+    run_R($tracedir, $RInstrBase, "--tracedir", $tracedir,
           "--trace", $tracemode,
           "-f", $scriptname, "--args", @scriptargs);
 }
