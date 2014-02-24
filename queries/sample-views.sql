@@ -3,6 +3,7 @@ DROP VIEW IF EXISTS memory_used;
 CREATE VIEW IF NOT EXISTS memory_used AS
 
 SELECT
+    trace_id,
     name,
     rusagemaxresidentmemoryset * 1024 as RUsageMemory_bytes,
     (allocatedcons - allocatedlist_elements * 56) as cons_bytes,
@@ -134,178 +135,217 @@ SELECT
   FROM external_vs_interpreter
 ;
 
+-- categorized runtimes as absolute times
+DROP VIEW IF EXISTS runtime_details_abs;
+CREATE VIEW runtime_details_abs AS
+  SELECT
+    name,
+
+    dotC_self            +
+    dotCFull_self        +
+    dotFortran_self      +
+    dotFortranFull_self  +
+    dotCall_self         +
+    dotCallFull_self     +
+    dotExternal_self     +
+    dotExternalFull_self
+      AS External,
+
+    FunLookup_self            +
+    SymLookup_self            +
+    FindVarInFrame3other_self +
+    bcEvalGetvar_self
+      AS Lookup,
+
+    Match_self
+      AS Match,
+
+    Duplicate_self
+      AS Duplicate,
+
+    GCInternal_self
+      AS GC,
+
+    cons_self        +
+    allocList_self   +
+    allocS4_self     +
+    allocVector_self
+      AS MemAlloc,
+
+    doSubset_self     +
+    doSubset2_self    +
+    doSubset3_self    +
+    doSubassign_self  +
+    doSubassign2_self +
+    doSubassign3_self
+      AS Subset,
+
+    EvalList_self
+      AS EvalList,
+
+    doArith_self      +
+    doMatprod_self    +
+    doLogic_self      +
+    doLogic2_self     +
+    doLogic3_self     +
+    doRelop_self      +
+    bcEvalArith1_self +
+    bcEvalArith2_self +
+    bcEvalMath1_self  +
+    bcEvalRelop_self  +
+    bcEvalLogic_self
+      AS Arith,
+
+    BuiltinSum_self  +
+    SpecialSum_self  +
+    do_internal_self
+      AS BuiltIn_Special,
+
+    bcEval_self           + -- FIXME?
+    Startup_self          +
+    Install_self          +
+    Repl_self             +
+    UserFunctionSum_self  +
+    UserFuncFallback_self +
+    setupMainLoop_self    +
+    endMainLoop_self      +
+    onExits_self          +
+    gzFile_self           +
+    bzFile_self           +
+    xzFile_self           +
+    doUnzip_self          +
+    zipRead_self          +
+    Download_self         +
+    Rsock_self            +
+    Sleep_self            +
+    System_self
+      AS Other,
+
+    TotalRuntime
+      AS TotalRuntime
+
+  FROM TimingResults_pivot
+
+  UNION ALL SELECT
+    " Average",
+
+    ROUND(SUM(
+      dotC_self            +
+      dotCFull_self        +
+      dotFortran_self      +
+      dotFortranFull_self  +
+      dotCall_self         +
+      dotCallFull_self     +
+      dotExternal_self     +
+      dotExternalFull_self
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS External,
+
+    ROUND(SUM(
+      FunLookup_self            +
+      SymLookup_self            +
+      FindVarInFrame3other_self +
+      bcEvalGetvar_self
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS Lookup,
+
+    ROUND(SUM(
+      Match_self
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS Match,
+
+    ROUND(SUM(
+      Duplicate_self
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS Duplicate,
+
+    ROUND(SUM(
+      GCInternal_self
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS GC,
+
+    ROUND(SUM(
+      cons_self        +
+      allocList_self   +
+      allocS4_self     +
+      allocVector_self
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS MemAlloc,
+
+    ROUND(SUM(
+      doSubset_self     +
+      doSubset2_self    +
+      doSubset3_self    +
+      doSubassign_self  +
+      doSubassign2_self +
+      doSubassign3_self
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS Subset,
+
+    ROUND(SUM(
+      EvalList_self
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS EvalList,
+
+    ROUND(SUM(
+      doArith_self      +
+      doMatprod_self    +
+      doLogic_self      +
+      doLogic2_self     +
+      doLogic3_self     +
+      doRelop_self      +
+      bcEvalArith1_self +
+      bcEvalArith2_self +
+      bcEvalMath1_self  +
+      bcEvalRelop_self  +
+      bcEvalLogic_self
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS Arith,
+
+    ROUND(SUM(
+      BuiltinSum_self  +
+      SpecialSum_self  +
+      do_internal_self
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS BuiltIn_Special,
+
+    ROUND(SUM(
+      bcEval_self           + -- FIXME?
+      Startup_self          +
+      Install_self          +
+      Repl_self             +
+      UserFunctionSum_self  +
+      UserFuncFallback_self +
+      setupMainLoop_self    +
+      endMainLoop_self      +
+      onExits_self          +
+      gzFile_self           +
+      bzFile_self           +
+      xzFile_self           +
+      doUnzip_self          +
+      zipRead_self          +
+      Download_self         +
+      Rsock_self            +
+      Sleep_self            +
+      System_self
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS Other,
+
+    ROUND(SUM(
+      TotalRuntime
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS TotalRuntime
+  FROM TimingResults_pivot
+ORDER BY NAME;
+
+--
 -- categorized runtimes as percentage of total
 --
 DROP VIEW IF EXISTS runtime_details_pct;
 CREATE VIEW runtime_details_pct AS
   SELECT
     name,
-    ROUND(100 * (
-      dotC_self            +
-      dotCFull_self        +
-      dotFortran_self      +
-      dotFortranFull_self  +
-      dotCall_self         +
-      dotCallFull_self     +
-      dotExternal_self     +
-      dotExternalFull_self
-    ) / CAST(TotalRuntime AS REAL), 4) AS External,
-    ROUND(100 * (
-      FunLookup_self            +
-      SymLookup_self            +
-      FindVarInFrame3other_self +
-      bcEvalGetvar_self
-    ) / CAST(TotalRuntime AS REAL), 4) AS Lookup,
-    ROUND(100 * (
-      Match_self
-    ) / CAST(TotalRuntime AS REAL), 4) AS Match,
-    ROUND(100 * (
-      Duplicate_self
-    ) / CAST(TotalRuntime AS REAL), 4) AS Duplicate,
-    ROUND(100 * (
-      GCInternal_self
-    ) / CAST(TotalRuntime AS REAL), 4) AS GC,
-    ROUND(100 * (
-      cons_self        +
-      allocList_self   +
-      allocS4_self     +
-      allocVector_self
-    ) / CAST(TotalRuntime AS REAL), 4) AS MemAlloc,
-    ROUND(100 * (
-      doSubset_self     +
-      doSubset2_self    +
-      doSubset3_self    +
-      doSubassign_self  +
-      doSubassign2_self +
-      doSubassign3_self
-    ) / CAST(TotalRuntime AS REAL), 4) AS Subset,
-    ROUND(100 * (
-      EvalList_self
-    ) / CAST(TotalRuntime AS REAL), 4) AS EvalList,
-    ROUND(100 * (
-      doArith_self      +
-      doMatprod_self    +
-      doLogic_self      +
-      doLogic2_self     +
-      doLogic3_self     +
-      doRelop_self      +
-      bcEvalArith1_self +
-      bcEvalArith2_self +
-      bcEvalMath1_self  +
-      bcEvalRelop_self  +
-      bcEvalLogic_self
-    ) / CAST(TotalRuntime AS REAL), 4) AS Arith,
-    ROUND(100 * (
-      BuiltinSum_self  +
-      SpecialSum_self  +
-      do_internal_self
-    ) / CAST(TotalRuntime AS REAL), 4) AS BuiltIn_Special,
-    ROUND(100 * (
-      bcEval_self           + -- FIXME?
-      Startup_self          +
-      Install_self          +
-      Repl_self             +
-      UserFunctionSum_self  +
-      UserFuncFallback_self +
-      setupMainLoop_self    +
-      endMainLoop_self      +
-      onExits_self          +
-      gzFile_self           +
-      bzFile_self           +
-      xzFile_self           +
-      doUnzip_self          +
-      zipRead_self          +
-      Download_self         +
-      Rsock_self            +
-      Sleep_self            +
-      System_self
-    ) / CAST(TotalRuntime AS REAL), 4) AS Other
-  FROM TimingResults_pivot
-
-  UNION ALL SELECT
-    " Average",
-    ROUND(100 * SUM(
-      dotC_self            +
-      dotCFull_self        +
-      dotFortran_self      +
-      dotFortranFull_self  +
-      dotCall_self         +
-      dotCallFull_self     +
-      dotExternal_self     +
-      dotExternalFull_self
-    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS External,
-    ROUND(100 * SUM(
-      FunLookup_self            +
-      SymLookup_self            +
-      FindVarInFrame3other_self +
-      bcEvalGetvar_self
-    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Lookup,
-    ROUND(100 * SUM(
-      Match_self
-    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Match,
-    ROUND(100 * SUM(
-      Duplicate_self
-    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Duplicate,
-    ROUND(100 * SUM(
-      GCInternal_self
-    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS GC,
-    ROUND(100 * SUM(
-      cons_self        +
-      allocList_self   +
-      allocS4_self     +
-      allocVector_self
-    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS MemAlloc,
-    ROUND(100 * SUM(
-      doSubset_self     +
-      doSubset2_self    +
-      doSubset3_self    +
-      doSubassign_self  +
-      doSubassign2_self +
-      doSubassign3_self
-    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Subset,
-    ROUND(100 * SUM(
-      EvalList_self
-    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS EvalList,
-    ROUND(100 * SUM(
-      doArith_self      +
-      doMatprod_self    +
-      doLogic_self      +
-      doLogic2_self     +
-      doLogic3_self     +
-      doRelop_self      +
-      bcEvalArith1_self +
-      bcEvalArith2_self +
-      bcEvalMath1_self  +
-      bcEvalRelop_self  +
-      bcEvalLogic_self
-    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Arith,
-    ROUND(100 * SUM(
-      BuiltinSum_self  +
-      SpecialSum_self  +
-      do_internal_self
-    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS BuiltIn_Special,
-    ROUND(100 * SUM(
-      bcEval_self           + -- FIXME?
-      Startup_self          +
-      Install_self          +
-      Repl_self             +
-      UserFunctionSum_self  +
-      UserFuncFallback_self +
-      setupMainLoop_self    +
-      endMainLoop_self      +
-      onExits_self          +
-      gzFile_self           +
-      bzFile_self           +
-      xzFile_self           +
-      doUnzip_self          +
-      zipRead_self          +
-      Download_self         +
-      Rsock_self            +
-      Sleep_self            +
-      System_self
-    ) / CAST(SUM(TotalRuntime) AS REAL), 4) AS Other
-  FROM TimingResults_pivot
-order by name;
+    ROUND(100 * External        / CAST(TotalRuntime AS REAL), 4) AS External,
+    ROUND(100 * Lookup          / CAST(TotalRuntime AS REAL), 4) AS Lookup,
+    ROUND(100 * Match           / CAST(TotalRuntime AS REAL), 4) AS Match,
+    ROUND(100 * Duplicate       / CAST(TotalRuntime AS REAL), 4) AS Duplicate,
+    ROUND(100 * GC              / CAST(TotalRuntime AS REAL), 4) AS GC,
+    ROUND(100 * MemAlloc        / CAST(TotalRuntime AS REAL), 4) AS MemAlloc,
+    ROUND(100 * Subset          / CAST(TotalRuntime AS REAL), 4) AS Subset,
+    ROUND(100 * EvalList        / CAST(TotalRuntime AS REAL), 4) AS EvalList,
+    ROUND(100 * Arith           / CAST(TotalRuntime AS REAL), 4) AS Arith,
+    ROUND(100 * BuiltIn_Special / CAST(TotalRuntime AS REAL), 4) AS BuiltIn_Special,
+    ROUND(100 * Other           / CAST(TotalRuntime AS REAL), 4) AS Other
+  FROM runtime_details_abs
+ORDER BY NAME;
 
 --
 -- memory allocations: total and os-reported maximum
@@ -346,44 +386,103 @@ UNION ALL SELECT
 order by name;
 
 --
+-- memory usage in bytes, categorized
+--
+DROP VIEW IF EXISTS memory_used_abs;
+CREATE VIEW memory_used_abs AS
+  SELECT
+    name,
+
+    cons_bytes +
+    lists_bytes
+      AS Lists,
+
+    -- include header sizes in this value
+    (zerovec_bytes  + 56 * zerovec_count ) +
+    (onevec_bytes   + 40 * onevec_count  ) +
+    (smallvec_bytes + 40 * smallvec_count) +
+    (largevec_bytes + 40 * largevec_count)
+      AS Vectors,
+
+    promises_bytes
+      AS Promises,
+
+    env_bytes
+      AS Environments,
+
+    external_bytes
+      AS External,
+
+    stringbuffer_bytes_needed +
+    sexp_bytes
+      AS Other,
+
+    total_bytes
+      AS Total_Bytes
+
+  FROM memory_used
+
+UNION ALL
+
+  SELECT
+    " Average",
+
+    ROUND(SUM(
+      cons_bytes +
+      lists_bytes
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4),
+
+    ROUND(SUM(
+      zerovec_bytes  + 56 * zerovec_count  +
+      onevec_bytes   + 40 * onevec_count   +
+      smallvec_bytes + 40 * smallvec_count +
+      largevec_bytes + 40 * largevec_count
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4),
+
+    ROUND(SUM(
+      promises_bytes
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4),
+
+    ROUND(SUM(
+      env_bytes
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4),
+
+    ROUND(SUM(
+      external_bytes
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4),
+
+    ROUND(SUM(
+      stringbuffer_bytes_needed +
+      sexp_bytes
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4),
+
+    ROUND(SUM(
+      total_bytes
+    ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4)
+
+  FROM memory_used ORDER BY name;
+
+
+--
 -- memory usage in percent of total bytes used
 --
 DROP VIEW IF EXISTS memory_used_pct;
 CREATE VIEW memory_used_pct AS
-
   SELECT
     name,
-    ROUND(100 * ( cons_bytes +  lists_bytes ) / CAST(total_bytes AS REAL),
-4) AS Lists,
-    ROUND(100 * ((zerovec_bytes + 56 * zerovec_count)
-    +   (onevec_bytes + 40 * onevec_count)
-    +   (smallvec_bytes + 40 * smallvec_count)
-    +   (largevec_bytes + 40 * largevec_count))  / CAST(total_bytes AS
-REAL), 4) AS Vectors,
-    ROUND(100 * promises_bytes / CAST(total_bytes AS REAL), 4) AS Promises,
-    ROUND(100 * env_bytes / CAST(total_bytes AS REAL), 4) AS Environments,
-    ROUND(100 * external_bytes / CAST(total_bytes AS REAL), 4)  AS External,
-    ROUND(100 * (stringbuffer_bytes_needed + sexp_bytes) /
-      CAST(total_bytes AS REAL), 4) AS Other
-  FROM memory_used
+    ROUND(100 * Lists        / CAST(Total_Bytes AS REAL), 4) AS Lists,
+    ROUND(100 * Vectors      / CAST(Total_Bytes AS REAL), 4) AS Vectors,
+    ROUND(100 * Promises     / CAST(Total_Bytes AS REAL), 4) AS Promises,
+    ROUND(100 * Environments / CAST(Total_Bytes AS REAL), 4) AS Environments,
+    ROUND(100 * External     / CAST(Total_Bytes AS REAL), 4) AS External,
+    ROUND(100 * Other        / CAST(Total_Bytes AS REAL), 4) AS Other
+  FROM memory_used_abs
+ORDER BY NAME;
 
-UNION ALL
-  SELECT
-    " Average",
-    ROUND(100 * (SUM(cons_bytes) + SUM(lists_bytes)) / CAST(SUM(total_bytes) as real), 4),
-    ROUND(100 * ((SUM(zerovec_bytes) + 56 * SUM(zerovec_count))
-    +   (SUM(onevec_bytes) + 40 * SUM(onevec_count))
-    +   (SUM(smallvec_bytes) + 40 * SUM(smallvec_count))
-    +   (SUM(largevec_bytes) + 40 * SUM(largevec_count)))  / CAST(SUM(total_bytes) AS
-REAL), 4),
-    ROUND(100 * SUM(promises_bytes) / CAST(SUM(total_bytes) AS REAL), 4),
-    ROUND(100 * SUM(env_bytes) / CAST(SUM(total_bytes) AS REAL), 4),
-    ROUND(100 * SUM(external_bytes) / CAST(SUM(total_bytes) AS REAL), 4),
-    ROUND(100 * (SUM(stringbuffer_bytes_needed) + SUM(sexp_bytes)) /
-      CAST(SUM(total_bytes) AS REAL), 4)
-  FROM memory_used ORDER BY name;
 
+--
 -- memory allocated to the four vector classes
+--
 drop view if exists vector_sizes;
 create view vector_sizes as
   select
