@@ -334,12 +334,10 @@ sub run_timeR {
 
 sub run_instrumented {
     my $tracedir   = shift;
-    my $tracemode  = shift;
     my $scriptname = shift;
     my @scriptargs = @_;
 
     run_R($tracedir, $RInstrBase, "--tracedir", $tracedir,
-          "--trace", $tracemode,
           "-f", $scriptname, "--args", @scriptargs);
 }
 
@@ -634,7 +632,7 @@ if (defined($scriptname)) {
     run_timeR($tracedir, $scriptname, @scriptargs);
 
     # run with r-instrumented
-    run_instrumented($tracedir, "all", $scriptname, @scriptargs); # FIXME: make "all" configurable?
+    run_instrumented($tracedir, $scriptname, @scriptargs);
 
     # read data files
     my $timingdata = read_datafile(catfile($tracedir, "script.time"));
