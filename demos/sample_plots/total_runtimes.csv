@@ -1,7 +1,7 @@
 name,totalruntime_seconds
-" Average",67.3085232134
-mandelbrot,28.774124418
-matmult-large,16.713776693
-matmult-large-na,200.771483599
-matmult-small-loops,87.425139022
-matmult-small-op,2.858092335
+" Average",29.0080480174
+mandelbrot,11.482099505
+matmult-large,15.045201941
+matmult-large-na,60.586071253
+matmult-small-loops,56.334238358
+matmult-small-op,1.59262903

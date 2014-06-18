@@ -1,7 +1,7 @@
 name,zero_pct,one_pct,small_pct,large_pct
-" Average",0.02,9.64,0.7,89.65
-mandelbrot,0.0,0.04,0.18,99.78
-matmult-large,0.11,0.88,4.26,94.76
-matmult-large-na,0.1,0.87,4.21,94.82
-matmult-small-loops,0.03,79.51,1.16,19.3
-matmult-small-op,0.16,1.29,6.25,92.31
+" Average",0.02,6.39,0.7,92.89
+mandelbrot,0.0,0.03,0.16,99.81
+matmult-large,0.14,0.85,5.36,93.65
+matmult-large-na,0.14,0.85,5.36,93.65
+matmult-small-loops,0.05,79.47,1.76,18.71
+matmult-small-op,0.26,1.51,9.56,88.67

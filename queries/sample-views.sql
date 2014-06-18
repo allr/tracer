@@ -196,12 +196,12 @@ CREATE VIEW runtime_details_abs AS
     bcEvalLogic_self
       AS Arith,
 
+    bcEval_self           + -- FIXME?
     BuiltinSum_self  +
     SpecialSum_self  +
     do_internal_self
       AS BuiltIn_Special,
 
-    bcEval_self           + -- FIXME?
     Startup_self          +
     Install_self          +
     Repl_self             +
@@ -294,13 +294,13 @@ CREATE VIEW runtime_details_abs AS
     ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS Arith,
 
     ROUND(SUM(
+      bcEval_self           + -- FIXME?
       BuiltinSum_self  +
       SpecialSum_self  +
       do_internal_self
     ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS BuiltIn_Special,
 
     ROUND(SUM(
-      bcEval_self           + -- FIXME?
       Startup_self          +
       Install_self          +
       Repl_self             +
