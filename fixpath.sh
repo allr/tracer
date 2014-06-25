@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ ."$2" == . ]; then
+if [ x"$2" = x ]; then
     echo Usage: $0 scriptfile basedir
     exit 1
 fi
