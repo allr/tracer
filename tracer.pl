@@ -590,6 +590,17 @@ create_tables($dbh);
 
 
 if (defined($scriptname)) {
+    # sanity check
+    if (! -e catfile($TimeRBase, "bin/R")) {
+        say STDERR "ERROR: Did not find a timeR installation in $TimeRBase";
+        exit 2;
+    }
+
+    if (! -e catfile($RInstrBase, "bin/R")) {
+        say STDERR "ERROR: Did not find an r-instrumented installation in $RInstrBase";
+        exit 2;
+    }
+
     # create directory for trace files
     if (defined($tracedir)) {
         # user-specified tracedir name, must not exist

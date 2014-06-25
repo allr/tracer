@@ -14,7 +14,7 @@ if [ -d traces ]; then
 fi
 
 for scr in $BASEDIR/demos/*.R; do
-    $BASEDIR/tracer.pl $scr
+    $BASEDIR/tracer.pl $scr || exit 2
 done
 
 $BASEDIR/tracer.pl --autopivot --sqldir $BASEDIR/queries
