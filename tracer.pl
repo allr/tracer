@@ -280,18 +280,21 @@ sub run_R {
         @_);
     my $stdout     = FileHandle->new;
     my $stdoutfile = FileHandle->new;
+    my $stderr     = FileHandle->new;
 
     open $stdoutfile, ">", catfile($datadir, "output.txt") or die "Can't open output.txt: $!";
 
     say "Running ", join(" ", @args);
 
-    my $pid = open3("<&", $stdout, 0, @args);
+    # FIXME: 0 for input is... inelegant, but I was unable to make any "<&"-based construct work
+    my $pid = open3(0, $stdout, $stderr, @args);
 
     do {
         my ($rin, $rout, $nfound);
 
         $rin = '';
         vec($rin, fileno($stdout), 1) = 1;
+        vec($rin, fileno($stderr), 1) = 1;
 
         $nfound = select($rout = $rin, undef, undef, undef);
 
@@ -303,6 +306,18 @@ sub run_R {
                 my ($buf, $nbyte);
 
                 $nbyte = sysread($stdout, $buf, 1024);
+                if ($nbyte < 0) {
+                    # Error
+                    say STDERR "Error reading R interpreter output: $!";
+                    goto LOOPEND; # can't "last" in do {}
+                }
+                print $stdoutfile $buf;
+                print $buf;
+            }
+            if (vec($rout, fileno($stderr), 1)) {
+                my ($buf, $nbyte);
+
+                $nbyte = sysread($stderr, $buf, 1024);
                 if ($nbyte < 0) {
                     # Error
                     say STDERR "Error reading R interpreter output: $!";
