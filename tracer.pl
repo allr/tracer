@@ -542,6 +542,7 @@ sub insert_extratables {
 my %config_values;
 
 read_config(catfile($ENV{HOME}, ".tracer.conf"), \%config_values);
+read_config(catfile($Bin, "tracer.conf"), \%config_values);
 read_config("tracer.conf", \%config_values);
 
 $TimeRBase    = get_config("TimeRBase", catfile($Bin, "timed"), \%config_values);

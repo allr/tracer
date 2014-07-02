@@ -124,10 +124,11 @@ want to disable the functionality temporarily.
 
 Configuration
 =============
-traceR looks for two configuration files, `$HOME/.tracer.conf` and
-`tracer.conf` in the current directory. The latter file may override
-settings from the first file and command line options may override
-settings from either of these files. traceR uses a rather simplicistic
+traceR looks for three configuration files, `$HOME/.tracer.conf`,
+`tracer.conf` in the directory of tracer.pl and
+`tracer.conf` in the current directory. The later files may override
+settings from the earlier files and command line options may override
+settings from any of these files. traceR uses a rather simplicistic
 configuration file parser which accepts lines of the form
 `key=value`, using case-insensitive keys. It skips blank lines and
 lines starting with a hash mark (`#`). The currently accepted
