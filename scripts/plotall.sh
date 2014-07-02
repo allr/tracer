@@ -26,3 +26,5 @@ for table in $PLOTTABLES_NORM; do
     sqlite3 -csv -header $DATABASE "select * from $table" > $PLOTDIR/$table.csv
     $BASEDIR/scripts/plotcsv.pl $PLOTDIR/$table.csv $PLOTDIR/$table.pdf
 done
+
+$BASEDIR/scripts/memoryplot.pl $DATABASE $PLOTDIR/memtime.pdf

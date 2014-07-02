@@ -60,3 +60,7 @@ demonstrate the analysis capabilities of the traceR system.
     also shows up in the time profile as a ~20% chunk of time spent in
     garbage collection.
 
+- memwaste.R
+
+    A simple script that does nothing useful, but has a non-flat
+    memory-over-time curve.
