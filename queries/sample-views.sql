@@ -5,7 +5,6 @@ CREATE VIEW IF NOT EXISTS memory_used AS
 SELECT
     trace_id,
     name,
-    rusagemaxresidentmemoryset * 1024 as RUsageMemory_bytes,
     (allocatedcons - allocatedlist_elements * 56) as cons_bytes,
     allocatedpromises as promises_bytes,
     allocatedenv as env_bytes,
@@ -135,6 +134,40 @@ SELECT
   FROM external_vs_interpreter
 ;
 
+-- helper view
+DROP VIEW IF EXISTS runtime_function_helperview;
+CREATE VIEW runtime_function_helperview AS
+  SELECT
+    trace_id AS the_trace_id,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:.subset_self' THEN value ELSE NULL END) AS dotsubset,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:.subset2_self' THEN value ELSE NULL END) AS dotsubset2,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:[_self' THEN value ELSE NULL END) AS subset1,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:[[_self' THEN value ELSE NULL END) AS subset2,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:[<-_self' THEN value ELSE NULL END) AS subassign1,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:[[<-_self' THEN value ELSE NULL END) AS subassign2,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:+_self' THEN value ELSE NULL END) AS plus,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:-_self' THEN value ELSE NULL END) AS minus,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:*_self' THEN value ELSE NULL END) AS mult,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:/_self' THEN value ELSE NULL END) AS div,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:^_self' THEN value ELSE NULL END) AS expo,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:%%_self' THEN value ELSE NULL END) AS modulo,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:%/%_self' THEN value ELSE NULL END) AS intdiv,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:%*%_self' THEN value ELSE NULL END) AS matmult,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:==_self' THEN value ELSE NULL END) AS equal,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:!=_self' THEN value ELSE NULL END) AS notequal,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:<_self' THEN value ELSE NULL END) AS lessthan,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:<=_self' THEN value ELSE NULL END) AS lessequal,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:>=_self' THEN value ELSE NULL END) AS greaterequal,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:>_self' THEN value ELSE NULL END) AS greater,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:&_self' THEN value ELSE NULL END) AS fulland,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:|_self' THEN value ELSE NULL END) AS fullor,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:!_self' THEN value ELSE NULL END) AS notoper,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:&&_self' THEN value ELSE NULL END) AS shortand,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:||_self' THEN value ELSE NULL END) AS shortor,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:any_self' THEN value ELSE NULL END) AS logany,
+    GROUP_CONCAT(CASE WHEN key='<.Primitive>:all_self' THEN value ELSE NULL END) AS logall
+  FROM TimingResults GROUP BY trace_id;
+
 -- categorized runtimes as absolute times
 DROP VIEW IF EXISTS runtime_details_abs;
 CREATE VIEW runtime_details_abs AS
@@ -152,9 +185,7 @@ CREATE VIEW runtime_details_abs AS
       AS External,
 
     FunLookup_self            +
-    SymLookup_self            +
-    FindVarInFrame3other_self +
-    bcEvalGetvar_self
+    SymLookup_self
       AS Lookup,
 
     Match_self
@@ -172,28 +203,20 @@ CREATE VIEW runtime_details_abs AS
     allocVector_self
       AS MemAlloc,
 
-    doSubset_self     +
-    doSubset2_self    +
-    doSubset3_self    +
-    doSubassign_self  +
-    doSubassign2_self +
-    doSubassign3_self
+    dotsubset +
+    dotsubset2 +
+    subset1 +
+    subset2 +
+    subassign1 +
+    subassign2
       AS Subset,
 
-    EvalList_self
+    Evallist_self
       AS EvalList,
 
-    doArith_self      +
-    doMatprod_self    +
-    doLogic_self      +
-    doLogic2_self     +
-    doLogic3_self     +
-    doRelop_self      +
-    bcEvalArith1_self +
-    bcEvalArith2_self +
-    bcEvalMath1_self  +
-    bcEvalRelop_self  +
-    bcEvalLogic_self
+    plus + minus + mult + div + expo + modulo + intdiv + matmult + equal + notequal +
+    lessthan + lessequal + greaterequal + greater + fulland + fullor + notoper + shortand +
+    shortor + logany + logall
       AS Arith,
 
     bcEval_self           + -- FIXME?
@@ -203,28 +226,16 @@ CREATE VIEW runtime_details_abs AS
       AS BuiltIn_Special,
 
     Startup_self          +
-    Install_self          +
     Repl_self             +
     UserFunctionSum_self  +
-    UserFuncFallback_self +
-    setupMainLoop_self    +
-    endMainLoop_self      +
-    onExits_self          +
-    gzFile_self           +
-    bzFile_self           +
-    xzFile_self           +
-    doUnzip_self          +
-    zipRead_self          +
-    Download_self         +
-    Rsock_self            +
-    Sleep_self            +
-    System_self
+    UserFuncFallback_self
       AS Other,
 
     TotalRuntime
       AS TotalRuntime
 
-  FROM TimingResults_pivot
+  FROM TimingResults_pivot JOIN runtime_function_helperview
+    ON TimingResults_pivot.trace_id=runtime_function_helperview.the_trace_id
 
   UNION ALL SELECT
     " Average",
@@ -242,9 +253,7 @@ CREATE VIEW runtime_details_abs AS
 
     ROUND(SUM(
       FunLookup_self            +
-      SymLookup_self            +
-      FindVarInFrame3other_self +
-      bcEvalGetvar_self
+      SymLookup_self
     ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS Lookup,
 
     ROUND(SUM(
@@ -267,12 +276,12 @@ CREATE VIEW runtime_details_abs AS
     ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS MemAlloc,
 
     ROUND(SUM(
-      doSubset_self     +
-      doSubset2_self    +
-      doSubset3_self    +
-      doSubassign_self  +
-      doSubassign2_self +
-      doSubassign3_self
+      dotsubset +
+      dotsubset2 +
+      subset1 +
+      subset2 +
+      subassign1 +
+      subassign2
     ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS Subset,
 
     ROUND(SUM(
@@ -280,17 +289,9 @@ CREATE VIEW runtime_details_abs AS
     ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS EvalList,
 
     ROUND(SUM(
-      doArith_self      +
-      doMatprod_self    +
-      doLogic_self      +
-      doLogic2_self     +
-      doLogic3_self     +
-      doRelop_self      +
-      bcEvalArith1_self +
-      bcEvalArith2_self +
-      bcEvalMath1_self  +
-      bcEvalRelop_self  +
-      bcEvalLogic_self
+      plus + minus + mult + div + expo + modulo + intdiv + matmult + equal + notequal +
+      lessthan + lessequal + greaterequal + greater + fulland + fullor + notoper + shortand +
+      shortor + logany + logall
     ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS Arith,
 
     ROUND(SUM(
@@ -302,28 +303,16 @@ CREATE VIEW runtime_details_abs AS
 
     ROUND(SUM(
       Startup_self          +
-      Install_self          +
       Repl_self             +
       UserFunctionSum_self  +
-      UserFuncFallback_self +
-      setupMainLoop_self    +
-      endMainLoop_self      +
-      onExits_self          +
-      gzFile_self           +
-      bzFile_self           +
-      xzFile_self           +
-      doUnzip_self          +
-      zipRead_self          +
-      Download_self         +
-      Rsock_self            +
-      Sleep_self            +
-      System_self
+      UserFuncFallback_self
     ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS Other,
 
     ROUND(SUM(
       TotalRuntime
     ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS TotalRuntime
-  FROM TimingResults_pivot
+  FROM TimingResults_pivot JOIN runtime_function_helperview
+    ON TimingResults_pivot.trace_id=runtime_function_helperview.the_trace_id
 ORDER BY NAME;
 
 --
@@ -354,7 +343,6 @@ DROP VIEW IF EXISTS memory_used_vs_alloc;
 CREATE VIEW memory_used_vs_alloc AS
 SELECT
     name,
-    rusagemaxresidentmemoryset / 1024.0 as RUsageMemory_mbytes,
     -- sum of all byte values to simplify the percentage view
     (allocatedcons + allocatedpromises + allocatedenv +
     allocatedsxp + allocatednoncons +
@@ -369,8 +357,6 @@ SELECT
 
 UNION ALL SELECT
   " Average",
-    sum(rusagemaxresidentmemoryset) / 1024.0 / cast(count(rusagemaxresidentmemoryset) as real)
-      as RUsageMemory_mbytes,
     (sum(allocatedcons) + sum(allocatedpromises) + sum(allocatedenv) +
     sum(allocatedsxp) + sum(allocatednoncons) +
     -- calculate size of list headers
