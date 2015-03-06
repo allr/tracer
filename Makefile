@@ -36,9 +36,6 @@ real-install:
 	$(Q)if [ ! -e $(REALPREFIX)/tracer.conf ]; then \
 	      cp tracer.conf $(REALPREFIX)/tracer.conf; \
 	    fi
-# create symlink for backwards compatibility
-	$(E) "  LN      tracer.sh"
-	$(Q)ln -sf $(REALPREFIX)/tracer.pl $(REALPREFIX)/tracer.sh
 # remove old version of traceR
 	$(Q)rm -f $(REALPREFIX)/tracer.jar
 # copy sample queries (and remove the old ones)

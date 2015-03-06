@@ -22,11 +22,6 @@ configuration file.
 If there is no `tracer.conf` file in the target directory, the
 installation process will copy a sample file.
 
-The installation process also creates a symlink named `tracer.sh` in
-the target directory that points to `tracer.pl`. This symlink is added
-for backwards compatibility and its creation may be removed in a
-future version.
-
 
 Demonstration
 =============
