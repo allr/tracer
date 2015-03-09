@@ -110,14 +110,20 @@ while (<IN>) {
 close IN;
 
 my $columns = scalar(@headers) - 1;
+my $rows    = scalar(@data);
 
 #say "Columns: $columns";
+#say "Rows: ", scalar(@data);
 
 # run gnuplot
 open PLOT,"|-","gnuplot" or die "ERROR: Failed to run gnuplot: $!";
 if ($plot_pdf) {
-    say PLOT "set terminal pdf";
+    # calculate a width that doesn't squeeze the bars too much
+    my $width = 2.5 + $rows * 0.15;
+    $width = 5 if $width < 5;
+    say PLOT "set terminal pdf size $width,3";
 } else {
+    # FIXME
     say PLOT "set terminal png";
 }
 

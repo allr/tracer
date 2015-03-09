@@ -35,7 +35,7 @@ use IPC::Open3;
 use Pod::Usage;
 use POSIX ':sys_wait_h';
 
-use constant TracesTableVersion        => 1;
+use constant TracesTableVersion        => 2;
 use constant TimingResultsTableVersion => 1;
 use constant TraceResultsTableVersion  => 1;
 
@@ -191,6 +191,7 @@ sub create_tables {
                         "scriptname VARCHAR NOT NULL," .
                         "args VARCHAR," .
                         "name VARCHAR," .
+                        "parent_id INTEGER REFERENCES Traces(id)," .
                         "tracedir VARCHAR," .
                         "tracetime INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP");
 
@@ -361,9 +362,10 @@ sub run_instrumented {
 sub read_datafile {
     my $filename = shift;
     my @labels = ();
-    my %data;
-    my @dataorder;
-    my %tables;
+    my (@dataorder, %data, %tables);
+    my $current_child;
+    my %maindata;
+    my (%childorder, %childdata, %childtables, @childids);
 
     open IN, "<", $filename or die "Can't open $filename: $!";
     while (<IN>) {
@@ -393,6 +395,28 @@ sub read_datafile {
                     columns   => [@labels], # forces a copy
                     data      => []
                 };
+
+            } elsif ($1 eq "CHILD") {
+                # data from a child process
+
+                if (!defined($current_child)) {
+                    # current was main process
+                    $maindata{order}  = [@dataorder];
+                    $maindata{data}   = {%data};
+                    $maindata{tables} = {%tables};
+                } else {
+                    # store child data
+                    $childorder{$current_child}  = [@dataorder];
+                    $childdata{$current_child}   = {%data};
+                    $childtables{$current_child} = {%tables};
+                    push @childids, $current_child;
+                }
+
+                @dataorder = ();
+                %data      = ();
+                %tables    = ();
+
+                $current_child = 0 + $words[1]; # FIXME: Consider allowing string child IDs
 
             } else {
                 # unknown marker
@@ -464,11 +488,31 @@ sub read_datafile {
     }
     close IN;
 
-    return {
-        order       => \@dataorder,
-        data        => \%data,
-        extratables => \%tables
-    };
+    if (!defined($current_child)) {
+        return {
+            order       => \@dataorder,
+            data        => \%data,
+            extratables => \%tables
+        };
+    } else {
+        # store data of last child
+        $childorder{$current_child}  = [@dataorder];
+        $childdata{$current_child}   = {%data};
+        $childtables{$current_child} = {%tables};
+        push @childids, $current_child;
+
+        my %childdata = ( "order"       => \%childorder,
+                          "data"        => \%childdata,
+                          "extratables" => \%childtables,
+                          "ids"         => \@childids );
+
+        return {
+            order       => $maindata{order},
+            data        => $maindata{data},
+            extratables => $maindata{tables},
+            childdata   => \%childdata
+        };
+    }
 }
 
 sub insert_results {
@@ -678,6 +722,39 @@ if (defined($scriptname)) {
     # put extra tables into database
     insert_extratables($dbh, $trace_id, $timingdata->{extratables});
     insert_extratables($dbh, $trace_id, $tracedata->{extratables});
+
+    # add child process data if available
+    if (exists($timingdata->{childdata})) {
+        my $childtiming = $timingdata->{childdata};
+        my $childtrace  = $tracedata->{childdata};
+        my $parent_id = $trace_id;
+
+        foreach my $child_name (@{$childtiming->{ids}}) {
+            # create a new trace for the child
+            $dbh->do("INSERT INTO Traces (scriptname, args, name, tracedir, parent_id) VALUES (?,?,?,?,?)",
+                     undef, $scriptname, join(" ", @scriptargs),
+                     sprintf("%s child %4d", $tracename, $child_name), # FIXME... Numeric or string?
+                     $tracedir, $parent_id);
+            $trace_id = $dbh->sqlite_last_insert_rowid();
+
+            # construct a temporary hash with the same structure as main
+            # (for great lazyness!)
+            my %chtime = (
+                "order"       => $childtiming->{order}->{$child_name},
+                "data"        => $childtiming->{data}->{$child_name}
+                );
+            my %chtrace = (
+                "order"       => $childtrace->{order}->{$child_name},
+                "data"        => $childtrace->{data}->{$child_name}
+                );
+
+            # stuff results into database
+            insert_results($dbh, $trace_id, TimingResultsTable, \%chtime);
+            insert_results($dbh, $trace_id, TraceResultsTable,  \%chtrace);
+            insert_extratables($dbh, $trace_id, $childtiming->{extratables}->{$child_name});
+            insert_extratables($dbh, $trace_id, $childtrace->{extratables}->{$child_name});
+        }
+    }
 }
 
 # create pivot tables
