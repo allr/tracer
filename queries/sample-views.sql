@@ -5,6 +5,7 @@ CREATE VIEW IF NOT EXISTS memory_used AS
 SELECT
     trace_id,
     name,
+    rusagemaxresidentmemoryset * 1024 as RUsageMemory_bytes,
     (allocatedcons - allocatedlist_elements * 56) as cons_bytes,
     allocatedpromises as promises_bytes,
     allocatedenv as env_bytes,
@@ -343,6 +344,7 @@ DROP VIEW IF EXISTS memory_used_vs_alloc;
 CREATE VIEW memory_used_vs_alloc AS
 SELECT
     name,
+    rusagemaxresidentmemoryset / 1024.0 as RUsageMemory_mbytes,
     -- sum of all byte values to simplify the percentage view
     (allocatedcons + allocatedpromises + allocatedenv +
     allocatedsxp + allocatednoncons +
@@ -357,6 +359,8 @@ SELECT
 
 UNION ALL SELECT
   " Average",
+    sum(rusagemaxresidentmemoryset) / 1024.0 / cast(count(rusagemaxresidentmemoryset) as real)
+      as RUsageMemory_mbytes,
     (sum(allocatedcons) + sum(allocatedpromises) + sum(allocatedenv) +
     sum(allocatedsxp) + sum(allocatednoncons) +
     -- calculate size of list headers
