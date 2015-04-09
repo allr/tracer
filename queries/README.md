@@ -1,6 +1,6 @@
 This directory contains a few SQL files that create sample views which
 summarize the information gathered in the database. They are
-automatically applied by the tracer.sh script after each run. Some of
+automatically applied by the tracer.pl script after each run. Some of
 the views are visualized by the demonstration plot script "plotall.sh"
 in the scripts subdirectory of traceR.
 
