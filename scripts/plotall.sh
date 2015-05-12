@@ -28,3 +28,4 @@ for table in $PLOTTABLES_NORM; do
 done
 
 $BASEDIR/scripts/memoryplot.pl $DATABASE $PLOTDIR/memtime.pdf
+$BASEDIR/scripts/plotchildren.pl $DATABASE $PLOTDIR/parallel.pdf

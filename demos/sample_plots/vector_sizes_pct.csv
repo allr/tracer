@@ -1,7 +1,13 @@
 name,zero_pct,one_pct,small_pct,large_pct
-" Average",0.02,6.39,0.7,92.89
-mandelbrot,0.0,0.03,0.16,99.81
-matmult-large,0.14,0.85,5.36,93.65
-matmult-large-na,0.14,0.85,5.36,93.65
-matmult-small-loops,0.05,79.47,1.76,18.71
-matmult-small-op,0.26,1.51,9.56,88.67
+" Average",0.0,1.03,0.04,98.93
+mandelbrot,0.0,0.06,0.04,99.89
+matmult-large,0.28,3.85,2.71,93.16
+matmult-large-na,0.28,3.85,2.71,93.16
+matmult-small-loops,0.06,94.95,0.55,4.44
+matmult-small-op,1.9,25.76,18.13,54.21
+memwaste,0.0,0.01,0.01,99.98
+paralleldemo,2.05,27.66,19.0,51.29
+"paralleldemo child    1",0.0,0.0,0.0,99.99
+"paralleldemo child    2",0.0,0.0,0.0,99.99
+"paralleldemo child    3",0.0,0.0,0.0,99.99
+"paralleldemo child    4",0.0,0.0,0.0,100.0

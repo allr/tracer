@@ -64,3 +64,10 @@ demonstrate the analysis capabilities of the traceR system.
 
     A simple script that does nothing useful, but has a non-flat
     memory-over-time curve.
+
+- paralleldemo.R
+
+    A script that runs matrix multiplication in parallel on multiple
+    cores using the `parallel` package. This is the only script that
+    is shown in the `parallel.pdf` plot because it is the only one
+    that uses more than one process.

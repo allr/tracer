@@ -1,6 +1,12 @@
 name,zero_count_pct,one_count_pct,small_count_pct,large_count_pct
-mandelbrot,1.2612,17.4237,78.7931,2.5219
-matmult-large,1.2645,17.4609,78.9482,2.3264
-matmult-large-na,1.2644,17.4646,78.9448,2.3263
-matmult-small-loops,0.0249,98.155,1.5559,0.2642
-matmult-small-op,1.2645,17.461,78.9481,2.3264
+mandelbrot,1.9747,62.534,31.0465,4.4448
+matmult-large,1.9817,62.7302,31.1352,4.153
+matmult-large-na,1.9815,62.733,31.1329,4.1526
+matmult-small-loops,0.0258,99.2956,0.4048,0.2738
+matmult-small-op,1.9817,62.7302,31.1352,4.153
+memwaste,1.9479,61.7896,30.6983,5.5642
+paralleldemo,2.0078,63.2391,30.5878,4.1653
+"paralleldemo child    1",0.6224,49.0664,31.3278,18.9834
+"paralleldemo child    2",0.6615,49.0628,30.871,19.4046
+"paralleldemo child    3",0.6615,49.0628,30.871,19.4046
+"paralleldemo child    4",0.6615,49.0628,30.871,19.4046

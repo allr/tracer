@@ -1,7 +1,13 @@
 name,totalruntime_seconds
-" Average",29.0080480174
-mandelbrot,11.482099505
-matmult-large,15.045201941
-matmult-large-na,60.586071253
-matmult-small-loops,56.334238358
-matmult-small-op,1.59262903
+" Average",47.8859977875455
+mandelbrot,4.742430699
+matmult-large,3.774051525
+matmult-large-na,5.643647292
+matmult-small-loops,16.868103639
+matmult-small-op,0.785733032
+memwaste,32.561599895
+paralleldemo,100.332701137
+"paralleldemo child    1",99.500282666
+"paralleldemo child    2",95.791484421
+"paralleldemo child    3",71.11126764
+"paralleldemo child    4",95.634673717
