@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 #
 # traceR: Frontend for timeR and r-instrumented
-# Copyright (C) 2014  TU Dortmund Informatik LS XII
+# Copyright (C) 2014-2015  TU Dortmund Informatik LS XII
 # Inspired by r-timed from the Reactor group at Purdue,
 #   http://r.cs.purdue.edu/
 #
