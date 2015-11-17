@@ -18,6 +18,8 @@ my %fieldmapping = (
     "Hostname"      => "hostname",
     );
 
+my $verbose = 0;
+
 sub linear_rgb_gradient {
     my $percentage = shift;
 
@@ -50,12 +52,24 @@ sub fetch_memory {
     my $dbh      = shift;
     my $trace_id = shift;
     my $table    = shift;
+    my $quantum  = shift;
     my @result;
 
-    my $sqlres = $dbh->selectall_arrayref("SELECT time, memory FROM $table WHERE trace_id=? ORDER BY time", undef, $trace_id);
+    # fetch time factor
+    my $sqlres = $dbh->selectall_arrayref("SELECT value FROM TraceResults WHERE trace_id=? and key=?", undef, $trace_id, $quantum);
+    if (@$sqlres > 0) {
+        # avoid warning if no freemem data is available
+        $quantum = 0 + $$sqlres[0][0];
+    }
+
+    # fetch data
+    $sqlres = $dbh->selectall_arrayref("SELECT time, memory FROM $table WHERE trace_id=? ORDER BY time", undef, $trace_id);
 
     foreach my $row (@$sqlres) {
-        $result[$$row[0]] = $$row[1];
+        # replicate data to second-resolution, simplifies merging
+        for (my $i = 0; $i < $quantum; $i++) {
+            $result[$$row[0] * $quantum + $i] = $$row[1];
+        }
     }
 
     return \@result;
@@ -96,10 +110,15 @@ sub fetch_rundata {
 
 # -------------
 
-if (scalar(@ARGV) != 2) {
-    say "Usage: $0 database pdfoutput";
+if (scalar(@ARGV) != 2 && scalar(@ARGV) != 3) {
+    say "Usage: $0 [-v] database pdfoutput";
     say "         creates a PDF plot of all memory curves from the given database";
     exit 1;
+}
+
+if ($ARGV[0] eq "-v") {
+    $verbose = 1;
+    shift;
 }
 
 my $DBFile  = $ARGV[0];
@@ -145,8 +164,8 @@ EOT
     say $parent_id;
     my %parentdata = %{fetch_rundata($dbh, $parent_id)};
 
-    my @parent_memory = @{fetch_memory($dbh, $parent_id, "MemoryOverTime")};
-    my @parent_free   = @{fetch_memory($dbh, $parent_id, "FreeMemoryOverTime")};
+    my @parent_memory = @{fetch_memory($dbh, $parent_id, "MemoryOverTime", "MallocmeasureQuantum")};
+    my @parent_free   = @{fetch_memory($dbh, $parent_id, "FreeMemoryOverTime", "FreememQuantum")};
 
     # get children data
     # FIXME: This is a bit hack-ish because it creates each child data hash in multiple consecutive loops,
@@ -174,8 +193,8 @@ EOT
     my %hosts;
 
     foreach my $child (@childdata) {
-        $child->{"memory"}  = fetch_memory($dbh, $child->{"id"}, "MemoryOverTime");
-        $child->{"freemem"} = fetch_memory($dbh, $child->{"id"}, "FreeMemoryOverTime");
+        $child->{"memory"}  = fetch_memory($dbh, $child->{"id"}, "MemoryOverTime", "MallocmeasureQuantum");
+        $child->{"freemem"} = fetch_memory($dbh, $child->{"id"}, "FreeMemoryOverTime", "FreememQuantum");
         $hosts{$child->{"hostname"}} ||= 0;
         $hosts{$child->{"hostname"}}  += 1;
     }
@@ -241,15 +260,24 @@ EOT
             next if $child->{hostname} ne $host;
             push @current_children, $child;
 
+            say "Processing child id $child->{id}" if $verbose;
+
             my $offset = floor($child->{start_time} / 1e6);
+            my $warnings = 0;
 
             for (my $i = 0; $i < scalar(@{$child->{"memory"}}); $i++) {
                 if ($i + $offset >= @memory_sum) {
-                    say "beyond parent length (",scalar(@memory_sum),") at $i + $offset (upto ", scalar(@{$child->{"memory"}}), ")";
-                    say "  start $child->{start_time} end $child->{end_time} pend $parentdata{end_time}";
-                    die;
+                    if ($warnings == 0) {
+                        say "WARNING: child data beyond parent (",scalar(@memory_sum),") at $i + $offset (upto ", scalar(@{$child->{"memory"}}), ")";
+                        say "  start $child->{start_time} end $child->{end_time} pend $parentdata{end_time}";
+                    }
+                    $warnings++;
                 }
                 $memory_sum[$i + $offset] += $child->{"memory"}->[$i];
+            }
+
+            if ($warnings) {
+                say "(dropped $warnings data points)";
             }
 
             for (my $i = 0; $i < scalar(@{$child->{"freemem"}}); $i++) {
@@ -261,6 +289,8 @@ EOT
         # plot data
         my $linecount  = 0;
         my (@limit_low, @limit_high, @childs_in_line);
+
+        say "Forwarding data to gnuplot" if $verbose;
 
         say $plotfh "set title \"$host\"";
 
