@@ -117,9 +117,9 @@ DROP VIEW IF EXISTS external_vs_interpreter;
 CREATE VIEW external_vs_interpreter AS
   SELECT
     traces.name,
-    dotexternal_self + dotcall_self +
+    dotexternal_self + rdodotcall_self +
       dotc_self + dotfortran_self AS external_code_time,
-    totalruntime - dotexternal_self - dotcall_self -
+    totalruntime - dotexternal_self - rdodotcall_self -
       dotc_self - dotfortran_self AS interpreter_time
   FROM TimingResults_pivot
   LEFT JOIN traces on traces.id = TimingResults_pivot.trace_id
@@ -179,8 +179,8 @@ CREATE VIEW runtime_details_abs AS
     dotCFull_self        +
     dotFortran_self      +
     dotFortranFull_self  +
-    dotCall_self         +
-    dotCallFull_self     +
+    rdodotCall_self      +
+    dodotCall_self       +
     dotExternal_self     +
     dotExternalFull_self
       AS External,
@@ -246,8 +246,8 @@ CREATE VIEW runtime_details_abs AS
       dotCFull_self        +
       dotFortran_self      +
       dotFortranFull_self  +
-      dotCall_self         +
-      dotCallFull_self     +
+      rdodotCall_self      +
+      dodotCall_self       +
       dotExternal_self     +
       dotExternalFull_self
     ) / CAST(COUNT(DISTINCT trace_id) AS REAL), 4) AS External,
