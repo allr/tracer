@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# NOTE: Update this for your installation!
 BASEDIR="$HOME/some/dir/"
 
 if [ -e db.db ]; then
