@@ -44,4 +44,7 @@ a deterministic profiling, so it can generate more detailed and
 accurate function usage statistics and can even profile the execution
 time spent in external C/Fortran code supplied by R packages.
 
+This work was partly supported by Deutsche Forschungsgemeinschaft (DFG)
+within the Collaborative Research Center SFB876, project A3.
+
 # References
