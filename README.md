@@ -1,18 +1,36 @@
 Intro
 =====
-traceR is a frontend script that runs an R program with both timeR and
-r-instrumented and imports their results into an sqlite3 database for
-further analysis.
+traceR is a profiling framework for the R language to analyze the
+resource usage of an R application to locate bottlenecks.
+traceR consists of two modified R interpreters, one
+for runtime measurements called [timeR][] and [r-instrumented][] for
+analyzing runtime and memory behavior. The results are gathered in an SQLite
+database for convenient analysis.
+
+[timeR]: https://github.com/allr/timeR
+[r-instrumented]: https://github.com/allr/r-instrumented
+
+The current version of traceR was inspired by the original traceR from
+the [Reactor group](http://r.cs.purdue.edu/) at Purdue University.
+This version has improved usability and analysis capability compared
+to the original. We added profiling for vector data structures,
+dynamic memory and CPU utilization profiles and profiling for parallel
+R programs.
+
 
 Installation
 ============
+Currently, traceR has only been tested on a Linux system. It can
+likely be compiled on other Unix-like systems, but chances of it working
+in Windows are relatively slim.
+
 It is strongly recommended to use the [traceR installer][] to install
 traceR as it will automatically install both timeR and r-instrumented
 in a directory of your choice with minimum hassle.
 
 [traceR installer]: https://github.com/allr/traceR-installer
 
-If you want to install traceR manually anyway, just use
+If you want to install traceR manually anyway (NOT recommended), just use
 `make install PREFIX=/where/you/want/it` to install traceR in a
 directory of your choice. It will assume that timeR and r-instrumented
 are installed in the directories "timed" and "instrumented" in the
@@ -22,11 +40,21 @@ configuration file.
 If there is no `tracer.conf` file in the target directory, the
 installation process will copy a sample file.
 
+Dependencies
+------------
+* Perl version 5.20 or later
+* Perl modules DBI and DBD::SQLite3
+* SQLite 3
+* everything needed to compile R itself, e.g. a Fortran compiler
+* Gnuplot 5.x (if you want to use the included plot scripts or run the
+    demo)
+
+
 
 Demonstration
 =============
 If you want to see a small demonstration of the data gathered by
-traceR, run the "rundemos.sh" script in the demos subdirectory after
+traceR, run the `rundemos.sh` script in the demos subdirectory after
 installation. It runs traceR on a few included example R programs and
 creates a number of PDF plots from the gathered data in a new
 subdirectory "plots".
@@ -43,14 +71,19 @@ stored in `traces/<scriptname>` (unless overridden) and parsed into
 `db.db` in the current directory. You can run traceR multiple times
 from within the same directory (or explicitly specifying the same
 database file) to accumulate data for multiple scripts and/or multiple
-runs of the same script into one database for analysis.
+runs of the same script into a single database for analysis.
 
-If your R program needs special packages, you need to make sure that
-these packages are installed in both the timeR and r-instrumented R
+If your R program needs additional packages, you need to make sure that
+these packages are
+[installed](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages)
+in both the timeR and r-instrumented R
 interpreters. There is currently no automation for this, so you need
 to run the installation manually for both timeR (by default assumed to
 be in `<Installdir>/timed`) and r-instrumented (in
-`<Installdir>/instrumented`).
+`<Installdir>/instrumented`). Since the two R interpreters are not
+installed as the system's default R, they must be run with the correct
+path, e.g. `<Installdir>/timed/bin/R CMD INSTALL ...` or
+`<Installdir>/instrumented/bin/R CMD INSTALL ...`.
 
 In addition to running an R program, traceR can also apply a set of
 SQL files from a directory and create pivot views in the
@@ -117,8 +150,8 @@ useful if you have set a default sqldir in a configuration file and
 want to disable the functionality temporarily.
 
 
-Configuration
-=============
+Configuration File
+==================
 traceR looks for three configuration files, `$HOME/.tracer.conf`,
 `tracer.conf` in the directory of tracer.pl and
 `tracer.conf` in the current directory. The later files may override
@@ -191,9 +224,8 @@ enabled. If set to "0", "no", "off" or "false", materialization is
 disabled. Please check the autopivoting section for more information.
 
 
-Database structure
-==================
-FIXME
+Database Notes
+==============
 
 Autopivoting
 ------------
@@ -225,9 +257,11 @@ trace runs to the database as the views will not be updated with the
 new data otherwise.
 
 
-Other included programs
-=======================
-A few helper scripts are installed along with traceR.
+Sample Plot Scripts
+===================
+A few helper scripts to generate plots from the gathered data are
+installed along with traceR. To use then, Gnuplot version 5.0 or later
+must be installed.
 
 scripts/plotall.sh
 ------------------
@@ -323,11 +357,15 @@ more details about the demonstration programs and their expected
 behaviour.
 
 
+Community Guidelines
+====================
+If you happen to find a bug, want to contribute or just have some kind
+of issue, please report it in this project's issue tracker on Github.
+
+
 Legalese
 ========
-Copyright (C) 2013-2015 TU Dortmund Informatik LS XII
-Inspired by r-timed from the [Reactor group](http://r.cs.purdue.edu/)
-at Purdue University
+Copyright (C) 2013-2017 TU Dortmund Informatik LS XII
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
